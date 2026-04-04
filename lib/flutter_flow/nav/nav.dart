@@ -102,7 +102,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: ResultsWidget.routeName,
           path: ResultsWidget.routePath,
-          builder: (context, params) => ResultsWidget(),
+          builder: (context, params) {
+            final imagePath = params.getParam<String>('imageFilePath', ParamType.String);
+
+            return ResultsWidget(imageFilePath: imagePath);
+          },
         ).toRoute(appStateNotifier),
         FFRoute(
           name: SellerDetailsWidget.routeName,

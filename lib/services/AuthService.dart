@@ -1,5 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:ft_fndr_app/models/auth_models.dart';
+import 'package:ft_fndr_app/providers/AuthNotifier.dart';
 import 'package:ft_fndr_app/services/ApiService.dart';
 import 'package:dio/dio.dart';
 
@@ -92,34 +93,61 @@ class AuthService {
 
 class AuthInterceptor extends Interceptor {
   final FlutterSecureStorage _secureStorage;
+  final AuthNotifier _authNotifier;
 
-  static const List<String> _publicRoutes = [loginRoute, signupRoute];
+  static const List<String> _publicRoutes = [
+    loginRoute,
+    signupRoute,
+  ];
 
-  AuthInterceptor(this._secureStorage);
+  bool _isHandlingUnauthorized = false;
+
+  AuthInterceptor(this._secureStorage, this._authNotifier);
+
+  bool _isPublicRoute(String path) {
+    return _publicRoutes.any((r) => path.contains(r));
+  }
 
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
-    if (_publicRoutes.any((r) => options.path.contains(r))) {
+  void onRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
+    if (_isPublicRoute(options.path)) {
       return handler.next(options);
     }
 
-    final token = await _secureStorage.read(key: AuthService.accessTokenKey);
+    final token = await _secureStorage.read(
+      key: AuthService.accessTokenKey,
+    );
+
     if (token != null && token.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $token';
     }
 
-    handler.next(options);
+    return handler.next(options);
   }
 
   @override
-  void onError(DioException err, ErrorInterceptorHandler handler) async {
-    if (err.response?.statusCode == 401) {
-      await Future.wait([
-        _secureStorage.delete(key: AuthService.accessTokenKey),
-        _secureStorage.delete(key: AuthService.refreshTokenKey),
-      ]);
+  void onError(
+    DioException err,
+    ErrorInterceptorHandler handler,
+  ) async {
+    if (err.response?.statusCode == 401 && !_isHandlingUnauthorized) {
+      _isHandlingUnauthorized = true;
+
+      try {
+        await Future.wait([
+          _secureStorage.delete(key: AuthService.accessTokenKey),
+          _secureStorage.delete(key: AuthService.refreshTokenKey),
+        ]);
+
+        _authNotifier.handleSessionExpired();
+      } finally {
+        _isHandlingUnauthorized = false;
+      }
     }
 
-    handler.next(err);
+    return handler.next(err);
   }
 }

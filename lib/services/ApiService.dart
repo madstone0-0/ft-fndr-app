@@ -7,6 +7,7 @@ import '../models/bookmarks_model.dart';
 import '../models/history_model.dart';
 import '../models/search_models.dart';
 import '../models/shared.dart';
+
 part 'ApiService.g.dart';
 
 // Routes
@@ -19,25 +20,32 @@ const String profileRoute = "$authBase/profile";
 const String bookmarkBase = "/bookmarks";
 const String bookmarksGetRoute = "$bookmarkBase/";
 const String bookmarksCreateRoute = "$bookmarkBase/";
-const String bookmarksDeleteRoute = "$bookmarkBase/{id}";
+const String bookmarksDeleteRoute = "$bookmarkBase/{bookmarkId}";
 
 const String historyBase = "/history";
 const String historyGetRoute = "$historyBase/";
 const String historyClearRoute = "$historyBase/clear";
-const String historyDeleteRoute = "$historyBase/{id}";
+const String historyDeleteRoute = "$historyBase/{historyId}";
 
-const String searchRoute = "/search";
+const String searchBase = "/search";
+const String searchByImageRoute = "$searchBase";
+const String searchWebPagesRoute = "$searchBase/webpages";
 
 @RestApi(baseUrl: "https://ft-fndr-1093fdee573a.herokuapp.com/")
 abstract class ApiService {
   factory ApiService(Dio dio, {String baseUrl}) = _ApiService;
 
   // Search
-  @POST(searchRoute)
+  @POST(searchByImageRoute)
   @MultiPart()
   Future<SearchResponse> searchForVisuallySimilarImages({
     @Part(name: "file") required MultipartFile file,
   });
+
+  @GET(searchWebPagesRoute)
+  Future<WebPageSearchResponse> searchWebPages(
+    @Query('imageUrl') String imageUrl,
+  );
 
   // Auth
   @POST(loginRoute)
@@ -56,7 +64,7 @@ abstract class ApiService {
   @DELETE(bookmarksDeleteRoute)
   Future<MessageResponse> deleteBookmark(@Path("id") String bookmarkId);
 
-  // History
+// History
   @GET(historyGetRoute)
   Future<HistoryResponse> getHistory();
 
@@ -66,6 +74,3 @@ abstract class ApiService {
   @POST(historyClearRoute)
   Future<MessageResponse> clearHistory();
 }
-
-
-

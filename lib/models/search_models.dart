@@ -1,7 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
-part "search_models.g.dart";
 
-// ─── Search ──────────────────────────────────────────────────────────────────
+part "search_models.g.dart";
 
 @JsonSerializable()
 class SearchResponse {
@@ -11,5 +10,21 @@ class SearchResponse {
   const SearchResponse({required this.message, required this.data});
 
   factory SearchResponse.fromJson(Map<String, dynamic> json) => _$SearchResponseFromJson(json);
+
   Map<String, dynamic> toJson() => _$SearchResponseToJson(this);
+}
+
+@JsonSerializable()
+class WebPageSearchResponse {
+  final String message;
+  final List<String> data;
+
+  const WebPageSearchResponse({
+    required this.message,
+    required this.data,
+  });
+
+  factory WebPageSearchResponse.fromJson(Map<String, dynamic> json) => _$WebPageSearchResponseFromJson(json);
+
+  Map<String, dynamic> toJson() => _$WebPageSearchResponseToJson(this);
 }

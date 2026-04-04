@@ -1,6 +1,17 @@
+import 'package:ft_fndr_app/models/auth_models.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part "history_model.g.dart";
+
+@JsonSerializable()
+class HistoryRequestBody {
+  final User user;
+
+  const HistoryRequestBody({required this.user});
+
+  factory HistoryRequestBody.fromJson(Map<String, dynamic> json) => _$HistoryRequestBodyFromJson(json);
+  Map<String, dynamic> toJson() => _$HistoryRequestBodyToJson(this);
+}
 
 @JsonSerializable()
 class HistoryItem {

@@ -28,332 +28,370 @@ class _SearchHistoryWidgetState extends State<SearchHistoryWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => SearchHistoryModel());
-    _model.textController ??= TextEditingController(text: '');
+    _model.textController ??= TextEditingController();
     _model.textFieldFocusNode ??= FocusNode();
+
     _authNotifier = getIt<AuthNotifier>();
     _authNotifier.addListener(_onAuthStateChanged);
+
+    if (_authNotifier.isAuthenticated) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _loadHistory();
+      });
+    }
   }
 
   @override
   void dispose() {
-    _model.dispose();
     _authNotifier.removeListener(_onAuthStateChanged);
+    _model.dispose();
     super.dispose();
   }
 
   void _onAuthStateChanged() {
-    if (mounted) {
+    if (!mounted) return;
+
+    if (_authNotifier.isAuthenticated) {
+      _loadHistory();
+    } else {
       setState(() {
-        // Only load history if authenticated
-        if (_authNotifier.isAuthenticated) {
-          _loadHistory();
-        }
+        _model.status = SearchHistoryStatus.initial;
+        _model.historyGroups = [];
+        _model.errorMessage = null;
       });
     }
   }
 
   Future<void> _loadHistory() async {
     await _model.loadHistory();
-    _model.initHistoryItemModels(context);
-    if (mounted) safeSetState(() {});
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  Future<void> _refresh() async {
+    if (!_authNotifier.isAuthenticated) return;
+    await _loadHistory();
+  }
+
+  Future<void> _clearAll() async {
+    await _model.clearHistory();
+    await _loadHistory();
+  }
+
+  PreferredSizeWidget _buildAppBar(
+    BuildContext context, {
+    required bool showClearAction,
+  }) {
+    final theme = FlutterFlowTheme.of(context);
+
+    return AppBar(
+      backgroundColor: theme.primaryBackground,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      titleSpacing: theme.designToken.spacing.lg,
+      title: Text(
+        'Search History',
+        style: theme.headlineMedium.override(
+          font: GoogleFonts.playfairDisplay(fontWeight: FontWeight.w600),
+          color: theme.primaryText,
+          fontSize: 28.0,
+          fontWeight: FontWeight.w600,
+          lineHeight: 1.25,
+        ),
+      ),
+      actions: [
+        if (showClearAction)
+          Padding(
+            padding: EdgeInsets.only(
+              right: theme.designToken.spacing.lg,
+            ),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(theme.designToken.radius.sm),
+              onTap: _clearAll,
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: theme.designToken.spacing.sm,
+                  vertical: theme.designToken.spacing.xs,
+                ),
+                child: Center(
+                  child: Text(
+                    'Clear All',
+                    style: theme.labelMedium.override(
+                      font: GoogleFonts.outfit(fontWeight: FontWeight.w600),
+                      color: theme.primary,
+                      fontSize: 13.0,
+                      fontWeight: FontWeight.w600,
+                      lineHeight: 1.38,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildSearchBar(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+
+    return Container(
+      color: theme.primaryBackground,
+      padding: EdgeInsetsDirectional.fromSTEB(
+        theme.designToken.spacing.lg,
+        theme.designToken.spacing.md,
+        theme.designToken.spacing.lg,
+        theme.designToken.spacing.md,
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(theme.designToken.radius.sm),
+          border: Border.all(
+            color: theme.outline,
+            width: 1.0,
+          ),
+        ),
+        padding: EdgeInsets.all(theme.designToken.spacing.sm),
+        child: Row(
+          children: [
+            Icon(
+              Icons.search_rounded,
+              color: theme.primaryText,
+              size: 16.0,
+            ),
+            Expanded(
+              child: TextFormField(
+                controller: _model.textController,
+                focusNode: _model.textFieldFocusNode,
+                obscureText: false,
+                decoration: InputDecoration(
+                  hintText: 'Search your history...',
+                  hintStyle: TextStyle(color: theme.hint),
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  errorBorder: InputBorder.none,
+                  focusedErrorBorder: InputBorder.none,
+                  isDense: true,
+                ),
+                style: TextStyle(color: theme.primaryText),
+                validator: _model.textControllerValidator.asValidator(context),
+              ),
+            ),
+          ].divide(SizedBox(width: theme.designToken.spacing.sm)),
+        ),
+      ),
+    );
   }
 
   Widget _buildSectionLabel(BuildContext context, String label) {
+    final theme = FlutterFlowTheme.of(context);
+
     return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, FlutterFlowTheme.of(context).designToken.spacing.md),
+      padding: EdgeInsets.only(bottom: theme.designToken.spacing.md),
       child: Text(
         label,
-        style: FlutterFlowTheme.of(context).labelLarge.override(
-              font: GoogleFonts.outfit(
-                fontWeight: FontWeight.w600,
-                fontStyle: FlutterFlowTheme.of(context).labelLarge.fontStyle,
-              ),
-              color: FlutterFlowTheme.of(context).primaryText,
-              fontSize: 15.0,
-              letterSpacing: 0.0,
-              fontWeight: FontWeight.w600,
-              fontStyle: FlutterFlowTheme.of(context).labelLarge.fontStyle,
-              lineHeight: 1.33,
-            ),
+        style: theme.labelLarge.override(
+          font: GoogleFonts.outfit(fontWeight: FontWeight.w600),
+          color: theme.primaryText,
+          fontSize: 15.0,
+          fontWeight: FontWeight.w600,
+          lineHeight: 1.33,
+        ),
       ),
     );
   }
 
   Widget _buildHistoryList(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
     int modelIndex = 0;
-    return SingleChildScrollView(
-      primary: false,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
+
+    return RefreshIndicator(
+      onRefresh: _refresh,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.all(theme.designToken.spacing.lg),
         children: [
           for (int g = 0; g < _model.historyGroups.length; g++) ...[
-            if (g > 0) Container(height: FlutterFlowTheme.of(context).designToken.spacing.md),
+            if (g > 0) SizedBox(height: theme.designToken.spacing.md),
             _buildSectionLabel(context, _model.historyGroups[g].label),
             for (final item in _model.historyGroups[g].items)
               wrapWithModel(
                 model: _model.historyItemModels[modelIndex++],
-                updateCallback: () => safeSetState(() {}),
+                updateCallback: () => setState(() {}),
                 child: HistoryItemWidget(
                   img_desc: item.imgDesc,
                   title: item.title,
-                  timestamp: item.timestamp,
+                  timestamp: item.timestamp.toString(),
                 ),
               ),
           ],
+          if (_model.historyGroups.isEmpty)
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.history_outlined, size: 64.0, color: theme.secondaryText),
+                  SizedBox(height: theme.designToken.spacing.lg),
+                  Text(
+                    'No history yet',
+                    style: theme.headlineSmall.override(
+                      font: GoogleFonts.playfairDisplay(fontWeight: FontWeight.w600),
+                      fontSize: 20.0,
+                    ),
+                  ),
+                  SizedBox(height: theme.designToken.spacing.sm),
+                  Text(
+                    'Your recent searches will appear here.',
+                    style: theme.bodyMedium.override(color: theme.secondaryText),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            )
         ],
       ),
     );
   }
 
   Widget _buildStatusBody(BuildContext context, SearchHistoryStatus status) {
-    return switch (status) {
-      SearchHistoryStatus.loading || SearchHistoryStatus.initial => const Center(child: CircularProgressIndicator()),
-      SearchHistoryStatus.error => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.error_outline_rounded, color: FlutterFlowTheme.of(context).error, size: 48.0),
-              const SizedBox(height: 12.0),
-              Text(
-                _model.errorMessage ?? 'Something went wrong.',
-                style: FlutterFlowTheme.of(context).bodyMedium.override(
-                      font: GoogleFonts.outfit(),
-                      color: FlutterFlowTheme.of(context).secondaryText,
-                    ),
-              ),
-              const SizedBox(height: 12.0),
-              TextButton(
-                onPressed: _loadHistory,
-                child: const Text('Retry'),
-              ),
-            ],
-          ),
-        ),
-      _ => const SizedBox.shrink(),
-    };
-  }
-
-  Widget _buildLoginPrompt(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
-    return Center(
-      child: Padding(
+
+    return RefreshIndicator(
+      onRefresh: _refresh,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: EdgeInsets.all(theme.designToken.spacing.lg),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.history_rounded, size: 64.0, color: theme.secondaryText),
-            SizedBox(height: theme.designToken.spacing.lg),
-            Text(
-              'Sign in to view your history',
-              style: theme.headlineSmall.override(
-                font: GoogleFonts.playfairDisplay(fontWeight: FontWeight.w600),
-                fontSize: 20.0,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: theme.designToken.spacing.sm),
-            Text(
-              'Your search history will be saved and synced across devices when you log in.',
-              style: theme.bodyMedium.override(
-                color: theme.secondaryText,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: theme.designToken.spacing.xl),
-            FFButtonWidget(
-              onPressed: () {
-                // Navigate to Profile tab
-                context.go('/profile');
-              },
-              text: 'Go to Profile',
-              options: FFButtonOptions(
-                width: 200.0,
-                height: 48.0,
-                color: theme.primary,
-                textStyle: theme.titleSmall.override(
-                  font: GoogleFonts.outfit(fontWeight: FontWeight.w600),
-                  color: Colors.white,
+        children: [
+          SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+          switch (status) {
+            SearchHistoryStatus.loading ||
+            SearchHistoryStatus.initial =>
+              const Center(child: CircularProgressIndicator()),
+            SearchHistoryStatus.error => Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.error_outline_rounded,
+                      color: theme.error,
+                      size: 48.0,
+                    ),
+                    const SizedBox(height: 12.0),
+                    Text(
+                      _model.errorMessage ?? 'Something went wrong.',
+                      style: theme.bodyMedium.override(
+                        font: GoogleFonts.outfit(),
+                        color: theme.secondaryText,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12.0),
+                    TextButton(
+                      onPressed: _loadHistory,
+                      child: const Text('Retry'),
+                    ),
+                  ],
                 ),
-                borderRadius: BorderRadius.circular(theme.designToken.radius.sm),
               ),
-            ),
-          ],
-        ),
+            _ => const SizedBox.shrink(),
+          },
+        ],
       ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // Check if user is authenticated
-    if (!_authNotifier.isAuthenticated) {
-      return Column(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          // Header
-          Container(
-            decoration: BoxDecoration(),
-            child: Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(
-                  FlutterFlowTheme.of(context).designToken.spacing.lg,
-                  FlutterFlowTheme.of(context).designToken.spacing.md,
-                  FlutterFlowTheme.of(context).designToken.spacing.lg,
-                  FlutterFlowTheme.of(context).designToken.spacing.md),
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    'Search History',
-                    style: FlutterFlowTheme.of(context).headlineMedium.override(
-                          font: GoogleFonts.playfairDisplay(
-                            fontWeight: FontWeight.bold,
-                            fontStyle: FlutterFlowTheme.of(context).headlineMedium.fontStyle,
-                          ),
-                          color: FlutterFlowTheme.of(context).primaryText,
-                          fontSize: 28.0,
-                          letterSpacing: 0.0,
-                          fontWeight: FontWeight.bold,
-                          fontStyle: FlutterFlowTheme.of(context).headlineMedium.fontStyle,
-                          lineHeight: 1.25,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // Login prompt
-          Expanded(child: _buildLoginPrompt(context)),
-        ],
-      );
-    }
+  Widget _buildLoginPrompt(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
 
-    return Column(
-      mainAxisSize: MainAxisSize.max,
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Header
-        Container(
-          decoration: BoxDecoration(color: FlutterFlowTheme.of(context).secondaryBackground),
-          child: Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(
-                FlutterFlowTheme.of(context).designToken.spacing.lg,
-                FlutterFlowTheme.of(context).designToken.spacing.md,
-                FlutterFlowTheme.of(context).designToken.spacing.lg,
-                FlutterFlowTheme.of(context).designToken.spacing.md),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
+    return RefreshIndicator(
+      onRefresh: () async {},
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.all(theme.designToken.spacing.lg),
+        children: [
+          SizedBox(height: MediaQuery.of(context).size.height * 0.15),
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  'Search History',
-                  style: FlutterFlowTheme.of(context).headlineMedium.override(
-                        font: GoogleFonts.playfairDisplay(
-                          fontWeight: FontWeight.w600,
-                          fontStyle: FlutterFlowTheme.of(context).headlineMedium.fontStyle,
-                        ),
-                        color: FlutterFlowTheme.of(context).primaryText,
-                        fontSize: 28.0,
-                        letterSpacing: 0.0,
-                        fontWeight: FontWeight.w600,
-                        lineHeight: 1.25,
-                      ),
+                Icon(
+                  Icons.history_rounded,
+                  size: 64.0,
+                  color: theme.secondaryText,
                 ),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(FlutterFlowTheme.of(context).designToken.radius.sm),
-                  ),
-                  child: Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(
-                        FlutterFlowTheme.of(context).designToken.spacing.md,
-                        FlutterFlowTheme.of(context).designToken.spacing.xs,
-                        FlutterFlowTheme.of(context).designToken.spacing.md,
-                        FlutterFlowTheme.of(context).designToken.spacing.xs),
-                    child: GestureDetector(
-                      onTap: () async {
-                        // TODO: clear history
-                        await _model.loadHistory();
-                        _model.initHistoryItemModels(context);
-                        safeSetState(() {});
-                      },
-                      child: Text(
-                        'Clear All',
-                        style: FlutterFlowTheme.of(context).labelMedium.override(
-                              font: GoogleFonts.outfit(
-                                fontWeight: FontWeight.w600,
-                                fontStyle: FlutterFlowTheme.of(context).labelMedium.fontStyle,
-                              ),
-                              color: FlutterFlowTheme.of(context).primary,
-                              fontSize: 13.0,
-                              letterSpacing: 0.0,
-                              fontWeight: FontWeight.w600,
-                              lineHeight: 1.38,
-                            ),
-                      ),
+                SizedBox(height: theme.designToken.spacing.lg),
+                Text(
+                  'Sign in to view your history',
+                  style: theme.headlineSmall.override(
+                    font: GoogleFonts.playfairDisplay(
+                      fontWeight: FontWeight.w600,
                     ),
+                    fontSize: 20.0,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: theme.designToken.spacing.sm),
+                Text(
+                  'Your search history will be saved and synced across devices when you log in.',
+                  style: theme.bodyMedium.override(
+                    color: theme.secondaryText,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: theme.designToken.spacing.xl),
+                FFButtonWidget(
+                  onPressed: () => context.go('/profile'),
+                  text: 'Go to Profile',
+                  options: FFButtonOptions(
+                    width: 200.0,
+                    height: 48.0,
+                    color: theme.primary,
+                    textStyle: theme.titleSmall.override(
+                      font: GoogleFonts.outfit(fontWeight: FontWeight.w600),
+                      color: Colors.white,
+                    ),
+                    borderRadius: BorderRadius.circular(theme.designToken.radius.sm),
                   ),
                 ),
               ],
             ),
           ),
-        ),
-        // Search bar
-        Container(
-          decoration: BoxDecoration(color: FlutterFlowTheme.of(context).secondaryBackground),
-          child: Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(
-                FlutterFlowTheme.of(context).designToken.spacing.lg,
-                FlutterFlowTheme.of(context).designToken.spacing.md,
-                FlutterFlowTheme.of(context).designToken.spacing.lg,
-                FlutterFlowTheme.of(context).designToken.spacing.md),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.transparent,
-                borderRadius: BorderRadius.circular(FlutterFlowTheme.of(context).designToken.radius.sm),
-                border: Border.all(color: FlutterFlowTheme.of(context).outline, width: 1.0),
-              ),
-              child: Padding(
-                padding: EdgeInsets.all(FlutterFlowTheme.of(context).designToken.spacing.sm),
-                child: Row(
-                  children: [
-                    Icon(Icons.search_rounded, color: FlutterFlowTheme.of(context).primaryText, size: 16.0),
-                    Expanded(
-                      child: TextFormField(
-                        controller: _model.textController,
-                        focusNode: _model.textFieldFocusNode,
-                        obscureText: false,
-                        decoration: InputDecoration(
-                          hintText: 'Search your history...',
-                          hintStyle: TextStyle(color: FlutterFlowTheme.of(context).hint),
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          errorBorder: InputBorder.none,
-                          focusedErrorBorder: InputBorder.none,
-                        ),
-                        style: TextStyle(color: FlutterFlowTheme.of(context).primaryText),
-                        validator: _model.textControllerValidator.asValidator(context),
-                      ),
-                    ),
-                  ].divide(SizedBox(width: FlutterFlowTheme.of(context).designToken.spacing.sm)),
-                ),
-              ),
-            ),
-          ),
-        ),
-        // History list
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAuthenticatedBody(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildSearchBar(context),
         Expanded(
-          child: Padding(
-            padding: EdgeInsets.all(FlutterFlowTheme.of(context).designToken.spacing.lg),
-            child: _model.status == SearchHistoryStatus.success
-                ? _buildHistoryList(context)
-                : _buildStatusBody(context, _model.status),
-          ),
+          child: _model.status == SearchHistoryStatus.success
+              ? _buildHistoryList(context)
+              : _buildStatusBody(context, _model.status),
         ),
       ],
+    );
+  }
+
+  Widget _buildSignedOutBody(BuildContext context) {
+    return _buildLoginPrompt(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isAuthed = _authNotifier.isAuthenticated;
+
+    return Scaffold(
+      backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+      appBar: _buildAppBar(
+        context,
+        showClearAction: isAuthed,
+      ),
+      body: isAuthed ? _buildAuthenticatedBody(context) : _buildSignedOutBody(context),
     );
   }
 }
