@@ -57,6 +57,33 @@ class _ApiService implements ApiService {
   }
 
   @override
+  Future<WebPageSearchResponse> searchWebPages(String imageUrl) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'imageUrl': imageUrl};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<WebPageSearchResponse>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/search/webpages',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late WebPageSearchResponse _value;
+    try {
+      _value = WebPageSearchResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
   Future<AuthResponse> login(LoginRequest request) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
@@ -177,7 +204,7 @@ class _ApiService implements ApiService {
       Options(method: 'DELETE', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/bookmarks/${bookmarkId}',
+            '/bookmarks/{bookmarkId}',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -195,12 +222,11 @@ class _ApiService implements ApiService {
   }
 
   @override
-  Future<HistoryResponse> getHistory(HistoryRequestBody request) async {
+  Future<HistoryResponse> getHistory() async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    _data.addAll(request.toJson());
+    const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<HistoryResponse>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
@@ -232,7 +258,7 @@ class _ApiService implements ApiService {
       Options(method: 'DELETE', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/history/${historyId}',
+            '/history/{historyId}',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -250,12 +276,11 @@ class _ApiService implements ApiService {
   }
 
   @override
-  Future<MessageResponse> clearHistory(HistoryRequestBody request) async {
+  Future<MessageResponse> clearHistory() async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    _data.addAll(request.toJson());
+    const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<MessageResponse>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(

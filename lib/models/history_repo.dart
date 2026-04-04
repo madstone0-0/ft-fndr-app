@@ -11,7 +11,7 @@ class HistoryRepository {
   HistoryRepository(this.api);
 
   Future<List<HistoryGroup>> getGroupedHistory() async {
-    final response = await api.getHistory(HistoryRequestBody(user: authNotifier.user!));
+    final response = await api.getHistory();
     return _groupByDate(response.data);
   }
 
@@ -20,7 +20,7 @@ class HistoryRepository {
   }
 
   Future<void> clearHistory() async {
-    await api.clearHistory(HistoryRequestBody(user: authNotifier.user!));
+    await api.clearHistory();
   }
 
   // ── Grouping logic ────────────────────────────────────────────────────────

@@ -13,7 +13,6 @@ class AuthNotifier extends ChangeNotifier {
 
   AuthNotifier(this._authService);
 
-  // Getters
   AuthStatus get status => _status;
 
   User? get user => _user;
@@ -22,9 +21,9 @@ class AuthNotifier extends ChangeNotifier {
 
   bool get isAuthenticated => _status == AuthStatus.authenticated;
 
-  // Initialize auth state (restore session)
   Future<void> initialize() async {
     _status = AuthStatus.loading;
+    _errorMessage = null;
     notifyListeners();
 
     try {
@@ -33,9 +32,11 @@ class AuthNotifier extends ChangeNotifier {
         _user = user;
         _status = AuthStatus.authenticated;
       } else {
+        _user = null;
         _status = AuthStatus.unauthenticated;
       }
     } catch (e) {
+      _user = null;
       _status = AuthStatus.unauthenticated;
       _errorMessage = 'Failed to restore session';
     }
@@ -43,7 +44,6 @@ class AuthNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Login
   Future<bool> login(String email, String password) async {
     _status = AuthStatus.loading;
     _errorMessage = null;
@@ -56,6 +56,7 @@ class AuthNotifier extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
+      _user = null;
       _status = AuthStatus.error;
       _errorMessage = _extractErrorMessage(e);
       notifyListeners();
@@ -63,8 +64,12 @@ class AuthNotifier extends ChangeNotifier {
     }
   }
 
-  // Signup
-  Future<bool> signup(String email, String password, String fname, String lname) async {
+  Future<bool> signup(
+    String email,
+    String password,
+    String fname,
+    String lname,
+  ) async {
     _status = AuthStatus.loading;
     _errorMessage = null;
     notifyListeners();
@@ -76,6 +81,7 @@ class AuthNotifier extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
+      _user = null;
       _status = AuthStatus.error;
       _errorMessage = _extractErrorMessage(e);
       notifyListeners();
@@ -83,7 +89,6 @@ class AuthNotifier extends ChangeNotifier {
     }
   }
 
-  // Logout
   Future<void> logout() async {
     await _authService.logout();
     _user = null;
@@ -92,7 +97,13 @@ class AuthNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Helper to extract error message from exception
+  void handleSessionExpired() {
+    _user = null;
+    _status = AuthStatus.unauthenticated;
+    _errorMessage = null;
+    notifyListeners();
+  }
+
   String _extractErrorMessage(dynamic error) {
     if (error.toString().contains('SocketException')) {
       return 'No internet connection';

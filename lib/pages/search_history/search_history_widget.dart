@@ -228,17 +228,28 @@ class _SearchHistoryWidgetState extends State<SearchHistoryWidget> {
               ),
           ],
           if (_model.historyGroups.isEmpty)
-            Padding(
-              padding: EdgeInsets.only(top: theme.designToken.spacing.xl),
-              child: Center(
-                child: Text(
-                  'No search history yet.',
-                  style: theme.bodyMedium.override(
-                    color: theme.secondaryText,
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.history_outlined, size: 64.0, color: theme.secondaryText),
+                  SizedBox(height: theme.designToken.spacing.lg),
+                  Text(
+                    'No history yet',
+                    style: theme.headlineSmall.override(
+                      font: GoogleFonts.playfairDisplay(fontWeight: FontWeight.w600),
+                      fontSize: 20.0,
+                    ),
                   ),
-                ),
+                  SizedBox(height: theme.designToken.spacing.sm),
+                  Text(
+                    'Your recent searches will appear here.',
+                    style: theme.bodyMedium.override(color: theme.secondaryText),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
-            ),
+            )
         ],
       ),
     );

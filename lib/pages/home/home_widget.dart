@@ -188,18 +188,18 @@ class _HomeWidgetState extends State<HomeWidget> {
                           ),
                         ),
                       ),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            // TODO: paste URL flow
-                          },
-                          child: _buildActionButton(
-                            context,
-                            icon: Icons.add_rounded,
-                            label: 'Paste URL',
-                          ),
-                        ),
-                      ),
+                      // Expanded(
+                      //   child: GestureDetector(
+                      //     onTap: () {
+                      //       // TODO: paste URL flow
+                      //     },
+                      //     child: _buildActionButton(
+                      //       context,
+                      //       icon: Icons.add_rounded,
+                      //       label: 'Paste URL',
+                      //     ),
+                      //   ),
+                      // ),
                     ].divide(SizedBox(width: theme.designToken.spacing.md)),
                   ),
                 ),
@@ -224,57 +224,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                  child: wrapWithModel(
-                                model: _model.recentSearchCardModel1,
-                                updateCallback: () => safeSetState(() {}),
-                                child: const RecentSearchCardWidget(
-                                  bg_color: Color(0xFFC69C6D),
-                                  img_desc: 'https://dimg.dreamflow.cloud/v1/image/kente%20cloth%20fabric%20pattern',
-                                  label: 'Kente top',
-                                ),
-                              )),
-                              Expanded(
-                                  child: wrapWithModel(
-                                model: _model.recentSearchCardModel2,
-                                updateCallback: () => safeSetState(() {}),
-                                child: const RecentSearchCardWidget(
-                                  bg_color: Color(0xFFA2B5CD),
-                                  img_desc: 'https://dimg.dreamflow.cloud/v1/image/blue%20denim%20shorts',
-                                  label: 'Shorts',
-                                ),
-                              )),
-                              Expanded(
-                                  child: wrapWithModel(
-                                model: _model.recentSearchCardModel3,
-                                updateCallback: () => safeSetState(() {}),
-                                child: const RecentSearchCardWidget(
-                                  bg_color: Color(0xFFD4A5B9),
-                                  img_desc: 'https://dimg.dreamflow.cloud/v1/image/pink%20pleated%20skirt',
-                                  label: 'Skirt',
-                                ),
-                              )),
-                            ].divide(SizedBox(width: theme.designToken.spacing.sm)),
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                  child: wrapWithModel(
-                                model: _model.recentSearchCardModel4,
-                                updateCallback: () => safeSetState(() {}),
-                                child: const RecentSearchCardWidget(
-                                  bg_color: Color(0xFF8FAD7F),
-                                  img_desc: 'https://dimg.dreamflow.cloud/v1/image/green%20dashiki%20shirt',
-                                  label: 'Dashiki',
-                                ),
-                              )),
-                              const Expanded(child: SizedBox()),
-                              const Expanded(child: SizedBox()),
-                            ].divide(SizedBox(width: theme.designToken.spacing.sm)),
-                          ),
-                        ].divide(SizedBox(height: theme.designToken.spacing.md)),
+                        ]
                       ),
                     ].divide(SizedBox(height: theme.designToken.spacing.md)),
                   ),
