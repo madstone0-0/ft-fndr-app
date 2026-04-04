@@ -1,7 +1,9 @@
+import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import 'dart:ui';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -16,12 +18,14 @@ class BookmarkItemWidget extends StatefulWidget {
     this.site,
     this.url,
     this.time,
+    this.onDelete,
   });
 
   final String? img_bg;
   final String? site;
   final String? url;
   final String? time;
+  final VoidCallback? onDelete;
 
   @override
   State<BookmarkItemWidget> createState() => _BookmarkItemWidgetState();
@@ -45,8 +49,44 @@ class _BookmarkItemWidgetState extends State<BookmarkItemWidget> {
   @override
   void dispose() {
     _model.maybeDispose();
-
     super.dispose();
+  }
+
+  Color _parseHex(String? hex) {
+    if (hex == null) return const Color(0xFFC5A073);
+    final clean = hex.replaceAll('#', '').trim();
+    if (clean.length == 6) return Color(int.parse('FF$clean', radix: 16));
+    return const Color(0xFFC5A073);
+  }
+
+  Future<void> _confirmDelete(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Remove bookmark?',
+            style: FlutterFlowTheme.of(context).titleMedium.override(
+                  font: GoogleFonts.playfairDisplay(fontWeight: FontWeight.w600),
+                )),
+        content: Text('This will remove "${widget.site}" from your bookmarks.',
+            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                  font: GoogleFonts.outfit(),
+                  color: FlutterFlowTheme.of(context).secondaryText,
+                )),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text('Cancel',
+                style: TextStyle(color: FlutterFlowTheme.of(context).secondaryText)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text('Remove',
+                style: TextStyle(color: FlutterFlowTheme.of(context).error)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) widget.onDelete?.call();
   }
 
   @override
@@ -72,13 +112,28 @@ class _BookmarkItemWidgetState extends State<BookmarkItemWidget> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: Color(0xFFC5A073),
-                  borderRadius: BorderRadius.circular(
-                      FlutterFlowTheme.of(context).designToken.radius.md),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(
+                    FlutterFlowTheme.of(context).designToken.radius.md),
+                child: Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: _parseHex(widget.img_bg),
+                    borderRadius: BorderRadius.circular(
+                        FlutterFlowTheme.of(context).designToken.radius.md),
+                  ),
+                  child: (widget.url != null && widget.url!.isNotEmpty)
+                      ? CachedNetworkImage(
+                          fadeInDuration: Duration.zero,
+                          fadeOutDuration: Duration.zero,
+                          imageUrl: widget.url!,
+                          width: 56,
+                          height: 56,
+                          fit: BoxFit.cover,
+                          errorWidget: (_, __, ___) => const SizedBox.shrink(),
+                        )
+                      : const SizedBox.shrink(),
                 ),
               ),
               Expanded(
@@ -89,10 +144,7 @@ class _BookmarkItemWidgetState extends State<BookmarkItemWidget> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      valueOrDefault<String>(
-                        widget!.site,
-                        'jumia.com.gh',
-                      ),
+                      valueOrDefault<String>(widget.site, 'jumia.com.gh'),
                       maxLines: 1,
                       style: FlutterFlowTheme.of(context).titleMedium.override(
                             font: GoogleFonts.outfit(
@@ -113,34 +165,7 @@ class _BookmarkItemWidgetState extends State<BookmarkItemWidget> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      valueOrDefault<String>(
-                        widget!.url,
-                        'https://group.jumia.com/',
-                      ),
-                      maxLines: 1,
-                      style: FlutterFlowTheme.of(context).bodySmall.override(
-                            font: GoogleFonts.outfit(
-                              fontWeight: FontWeight.normal,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .bodySmall
-                                  .fontStyle,
-                            ),
-                            color: FlutterFlowTheme.of(context).secondaryText,
-                            fontSize: 13,
-                            letterSpacing: 0.0,
-                            fontWeight: FontWeight.normal,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .bodySmall
-                                .fontStyle,
-                            lineHeight: 1.38,
-                          ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      valueOrDefault<String>(
-                        widget!.time,
-                        'Saved 2 days ago',
-                      ),
+                      valueOrDefault<String>(widget.time, 'Saved 2 days ago'),
                       style: FlutterFlowTheme.of(context).labelSmall.override(
                             font: GoogleFonts.outfit(
                               fontWeight: FontWeight.w600,
@@ -163,11 +188,22 @@ class _BookmarkItemWidgetState extends State<BookmarkItemWidget> {
                           FlutterFlowTheme.of(context).designToken.spacing.xs)),
                 ),
               ),
-              Icon(
-                Icons.favorite_rounded,
-                color: FlutterFlowTheme.of(context).primary,
-                size: 18,
-              ),
+              if (widget.onDelete != null)
+                FlutterFlowIconButton(
+                  buttonSize: 40.0,
+                  icon: Icon(
+                    Icons.delete_outline_rounded,
+                    color: FlutterFlowTheme.of(context).error,
+                    size: 18,
+                  ),
+                  onPressed: () => _confirmDelete(context),
+                )
+              else
+                Icon(
+                  Icons.favorite_rounded,
+                  color: FlutterFlowTheme.of(context).primary,
+                  size: 18,
+                ),
             ].divide(SizedBox(
                 width: FlutterFlowTheme.of(context).designToken.spacing.md)),
           ),
