@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:ft_fndr_app/models/history_repo.dart';
+import 'package:ft_fndr_app/models/search_repo.dart';
 import 'package:ft_fndr_app/providers/AuthNotifier.dart';
 import 'package:ft_fndr_app/services/ApiService.dart';
 import 'package:ft_fndr_app/services/AuthService.dart';
@@ -18,5 +19,6 @@ Future<void> setupLocatorService() async {
   getIt.registerLazySingleton<ApiService>(() => ApiService(getIt<Dio>()));
   getIt.registerLazySingleton(() => AuthService(getIt<ApiService>(), getIt<FlutterSecureStorage>()));
   getIt.registerLazySingleton(() => HistoryRepository(getIt<ApiService>()));
+  getIt.registerLazySingleton(() => SearchRepository(getIt<ApiService>()));
   getIt.registerSingleton<AuthNotifier>(AuthNotifier(getIt<AuthService>()));
 }

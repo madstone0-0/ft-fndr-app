@@ -1,8 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 part "search_models.g.dart";
 
-// ─── Search ──────────────────────────────────────────────────────────────────
-
 @JsonSerializable()
 class SearchResponse {
   final String message;
