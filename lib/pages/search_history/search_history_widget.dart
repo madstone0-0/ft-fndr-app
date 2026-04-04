@@ -31,10 +31,24 @@ class _SearchHistoryWidgetState extends State<SearchHistoryWidget> {
     _model.textController ??= TextEditingController(text: '');
     _model.textFieldFocusNode ??= FocusNode();
     _authNotifier = getIt<AuthNotifier>();
+    _authNotifier.addListener(_onAuthStateChanged);
+  }
 
-    // Only load history if authenticated
-    if (_authNotifier.isAuthenticated) {
-      _loadHistory();
+  @override
+  void dispose() {
+    _model.dispose();
+    _authNotifier.removeListener(_onAuthStateChanged);
+    super.dispose();
+  }
+
+  void _onAuthStateChanged() {
+    if (mounted) {
+      setState(() {
+        // Only load history if authenticated
+        if (_authNotifier.isAuthenticated) {
+          _loadHistory();
+        }
+      });
     }
   }
 
@@ -44,29 +58,23 @@ class _SearchHistoryWidgetState extends State<SearchHistoryWidget> {
     if (mounted) safeSetState(() {});
   }
 
-  @override
-  void dispose() {
-    _model.dispose();
-    super.dispose();
-  }
-
   Widget _buildSectionLabel(BuildContext context, String label) {
     return Padding(
       padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, FlutterFlowTheme.of(context).designToken.spacing.md),
       child: Text(
         label,
         style: FlutterFlowTheme.of(context).labelLarge.override(
-          font: GoogleFonts.outfit(
-            fontWeight: FontWeight.w600,
-            fontStyle: FlutterFlowTheme.of(context).labelLarge.fontStyle,
-          ),
-          color: FlutterFlowTheme.of(context).primaryText,
-          fontSize: 15.0,
-          letterSpacing: 0.0,
-          fontWeight: FontWeight.w600,
-          fontStyle: FlutterFlowTheme.of(context).labelLarge.fontStyle,
-          lineHeight: 1.33,
-        ),
+              font: GoogleFonts.outfit(
+                fontWeight: FontWeight.w600,
+                fontStyle: FlutterFlowTheme.of(context).labelLarge.fontStyle,
+              ),
+              color: FlutterFlowTheme.of(context).primaryText,
+              fontSize: 15.0,
+              letterSpacing: 0.0,
+              fontWeight: FontWeight.w600,
+              fontStyle: FlutterFlowTheme.of(context).labelLarge.fontStyle,
+              lineHeight: 1.33,
+            ),
       ),
     );
   }
@@ -102,26 +110,26 @@ class _SearchHistoryWidgetState extends State<SearchHistoryWidget> {
     return switch (status) {
       SearchHistoryStatus.loading || SearchHistoryStatus.initial => const Center(child: CircularProgressIndicator()),
       SearchHistoryStatus.error => Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.error_outline_rounded, color: FlutterFlowTheme.of(context).error, size: 48.0),
-            const SizedBox(height: 12.0),
-            Text(
-              _model.errorMessage ?? 'Something went wrong.',
-              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                font: GoogleFonts.outfit(),
-                color: FlutterFlowTheme.of(context).secondaryText,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.error_outline_rounded, color: FlutterFlowTheme.of(context).error, size: 48.0),
+              const SizedBox(height: 12.0),
+              Text(
+                _model.errorMessage ?? 'Something went wrong.',
+                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                      font: GoogleFonts.outfit(),
+                      color: FlutterFlowTheme.of(context).secondaryText,
+                    ),
               ),
-            ),
-            const SizedBox(height: 12.0),
-            TextButton(
-              onPressed: _loadHistory,
-              child: const Text('Retry'),
-            ),
-          ],
+              const SizedBox(height: 12.0),
+              TextButton(
+                onPressed: _loadHistory,
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
         ),
-      ),
       _ => const SizedBox.shrink(),
     };
   }
@@ -200,21 +208,17 @@ class _SearchHistoryWidgetState extends State<SearchHistoryWidget> {
                   Text(
                     'Search History',
                     style: FlutterFlowTheme.of(context).headlineMedium.override(
-                      font: GoogleFonts.playfairDisplay(
-                        fontWeight: FontWeight.bold,
-                        fontStyle: FlutterFlowTheme.of(context)
-                            .headlineMedium
-                            .fontStyle,
-                      ),
-                      color: FlutterFlowTheme.of(context).primaryText,
-                      fontSize: 28.0,
-                      letterSpacing: 0.0,
-                      fontWeight: FontWeight.bold,
-                      fontStyle: FlutterFlowTheme.of(context)
-                          .headlineMedium
-                          .fontStyle,
-                      lineHeight: 1.25,
-                    ),
+                          font: GoogleFonts.playfairDisplay(
+                            fontWeight: FontWeight.bold,
+                            fontStyle: FlutterFlowTheme.of(context).headlineMedium.fontStyle,
+                          ),
+                          color: FlutterFlowTheme.of(context).primaryText,
+                          fontSize: 28.0,
+                          letterSpacing: 0.0,
+                          fontWeight: FontWeight.bold,
+                          fontStyle: FlutterFlowTheme.of(context).headlineMedium.fontStyle,
+                          lineHeight: 1.25,
+                        ),
                   ),
                 ],
               ),
@@ -247,16 +251,16 @@ class _SearchHistoryWidgetState extends State<SearchHistoryWidget> {
                 Text(
                   'Search History',
                   style: FlutterFlowTheme.of(context).headlineMedium.override(
-                    font: GoogleFonts.playfairDisplay(
-                      fontWeight: FontWeight.w600,
-                      fontStyle: FlutterFlowTheme.of(context).headlineMedium.fontStyle,
-                    ),
-                    color: FlutterFlowTheme.of(context).primaryText,
-                    fontSize: 28.0,
-                    letterSpacing: 0.0,
-                    fontWeight: FontWeight.w600,
-                    lineHeight: 1.25,
-                  ),
+                        font: GoogleFonts.playfairDisplay(
+                          fontWeight: FontWeight.w600,
+                          fontStyle: FlutterFlowTheme.of(context).headlineMedium.fontStyle,
+                        ),
+                        color: FlutterFlowTheme.of(context).primaryText,
+                        fontSize: 28.0,
+                        letterSpacing: 0.0,
+                        fontWeight: FontWeight.w600,
+                        lineHeight: 1.25,
+                      ),
                 ),
                 Container(
                   decoration: BoxDecoration(
@@ -279,16 +283,16 @@ class _SearchHistoryWidgetState extends State<SearchHistoryWidget> {
                       child: Text(
                         'Clear All',
                         style: FlutterFlowTheme.of(context).labelMedium.override(
-                          font: GoogleFonts.outfit(
-                            fontWeight: FontWeight.w600,
-                            fontStyle: FlutterFlowTheme.of(context).labelMedium.fontStyle,
-                          ),
-                          color: FlutterFlowTheme.of(context).primary,
-                          fontSize: 13.0,
-                          letterSpacing: 0.0,
-                          fontWeight: FontWeight.w600,
-                          lineHeight: 1.38,
-                        ),
+                              font: GoogleFonts.outfit(
+                                fontWeight: FontWeight.w600,
+                                fontStyle: FlutterFlowTheme.of(context).labelMedium.fontStyle,
+                              ),
+                              color: FlutterFlowTheme.of(context).primary,
+                              fontSize: 13.0,
+                              letterSpacing: 0.0,
+                              fontWeight: FontWeight.w600,
+                              lineHeight: 1.38,
+                            ),
                       ),
                     ),
                   ),

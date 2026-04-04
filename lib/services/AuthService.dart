@@ -31,11 +31,6 @@ class AuthService {
   }
 
   Future<void> logout() async {
-    try {
-      await _apiService.logout();
-    } catch (e) {
-      // Continue with local logout even if API call fails
-    }
     await _clearAuthData();
   }
 
@@ -52,27 +47,22 @@ class AuthService {
     final token = await getToken();
     if (token == null || token.isEmpty) return null;
 
-    try {
-      return await _apiService.getProfile();
-    } catch (e) {
-      // Fall back to locally cached data
-      final userId = await _secureStorage.read(key: _userIdKey);
-      final email = await _secureStorage.read(key: _userEmailKey);
+    final userId = await _secureStorage.read(key: _userIdKey);
+    final email = await _secureStorage.read(key: _userEmailKey);
 
-      if (userId != null && email != null) {
-        return User(
-          id: userId,
-          email: email,
-          userMetadata: UserMetadata(
-            firstName: await _secureStorage.read(key: _userFirstNameKey),
-            lastName: await _secureStorage.read(key: _userLastNameKey),
-          ),
-        );
-      }
-
-      await _clearAuthData();
-      return null;
+    if (userId != null && email != null) {
+      return User(
+        id: userId,
+        email: email,
+        userMetadata: UserMetadata(
+          firstName: await _secureStorage.read(key: _userFirstNameKey),
+          lastName: await _secureStorage.read(key: _userLastNameKey),
+        ),
+      );
     }
+
+    await _clearAuthData();
+    return null;
   }
 
   Future<void> _saveAuthData(AuthResponse response) async {

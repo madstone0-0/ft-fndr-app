@@ -46,12 +46,6 @@ abstract class ApiService {
   @POST(signupRoute)
   Future<AuthResponse> register(@Body() RegisterRequest request);
 
-  @POST(logoutRoute)
-  Future<void> logout();
-
-  @GET(profileRoute)
-  Future<User> getProfile();
-
   // Bookmarks
   @GET(bookmarksGetRoute)
   Future<BookmarksResponse> getBookmarks();

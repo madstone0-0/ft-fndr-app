@@ -37,13 +37,23 @@ class _BookmarksWidgetState extends State<BookmarksWidget> {
     super.initState();
     _model = createModel(context, () => BookmarksModel());
     _authNotifier = getIt<AuthNotifier>();
+    _authNotifier.addListener(_onAuthStateChanged);
   }
 
   @override
   void dispose() {
     _model.dispose();
+    _authNotifier.removeListener(_onAuthStateChanged);
 
     super.dispose();
+  }
+
+  void _onAuthStateChanged() {
+    if (mounted) {
+      setState(() {
+      // Rebuild the widget when auth state changes
+    });
+    }
   }
 
   Widget _buildLoginPrompt(BuildContext context) {
