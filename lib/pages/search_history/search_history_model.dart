@@ -18,7 +18,11 @@ class HistoryItemData {
   final String title;
   final String timestamp;
 
-  const HistoryItemData({required this.imgDesc, required this.title, required this.timestamp});
+  const HistoryItemData({
+    required this.imgDesc,
+    required this.title,
+    required this.timestamp,
+  });
 }
 
 enum SearchHistoryStatus { initial, loading, success, error }
@@ -27,6 +31,7 @@ class SearchHistoryModel extends FlutterFlowModel<SearchHistoryWidget> {
   FocusNode? textFieldFocusNode;
   TextEditingController? textController;
   String? Function(BuildContext, String?)? textControllerValidator;
+
   final repo = getIt<HistoryRepository>();
 
   SearchHistoryStatus status = SearchHistoryStatus.initial;
@@ -35,10 +40,15 @@ class SearchHistoryModel extends FlutterFlowModel<SearchHistoryWidget> {
 
   List<HistoryItemModel> historyItemModels = [];
 
-  Future<void> loadHistory() async {
+  int get totalItemCount => historyGroups.fold(0, (sum, group) => sum + group.items.length);
+
+  Future<void> loadHistory(BuildContext context) async {
     status = SearchHistoryStatus.loading;
+    errorMessage = null;
+
     try {
       historyGroups = await repo.getGroupedHistory();
+      _initHistoryItemModels(context);
       status = SearchHistoryStatus.success;
     } catch (e) {
       errorMessage = e.toString();
@@ -46,11 +56,14 @@ class SearchHistoryModel extends FlutterFlowModel<SearchHistoryWidget> {
     }
   }
 
-  Future<void> clearHistory() async {
+  Future<void> clearHistory(BuildContext context) async {
     status = SearchHistoryStatus.loading;
+    errorMessage = null;
+
     try {
       await repo.clearHistory();
       historyGroups = [];
+      _initHistoryItemModels(context);
       status = SearchHistoryStatus.success;
     } catch (e) {
       errorMessage = e.toString();
@@ -58,7 +71,16 @@ class SearchHistoryModel extends FlutterFlowModel<SearchHistoryWidget> {
     }
   }
 
-  int get totalItemCount => historyGroups.fold(0, (sum, group) => sum + group.items.length);
+  void _initHistoryItemModels(BuildContext context) {
+    for (final model in historyItemModels) {
+      model.dispose();
+    }
+
+    historyItemModels = List.generate(
+      totalItemCount,
+      (_) => createModel(context, () => HistoryItemModel()),
+    );
+  }
 
   @override
   void initState(BuildContext context) {}
@@ -67,6 +89,7 @@ class SearchHistoryModel extends FlutterFlowModel<SearchHistoryWidget> {
   void dispose() {
     textFieldFocusNode?.dispose();
     textController?.dispose();
+
     for (final model in historyItemModels) {
       model.dispose();
     }

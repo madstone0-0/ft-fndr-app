@@ -289,7 +289,7 @@ class _BookmarksWidgetState extends State<BookmarksWidget> {
         Wrap(
           spacing: spacing.sm,
           runSpacing: spacing.sm,
-          children: items.map((h) => _buildChip(context, h.title)).toList(),
+          children: items.map((h) => _buildChip(context, h.vendorUrl)).toList(),
         ),
       ],
     );

@@ -130,8 +130,8 @@ class BookmarksModel extends FlutterFlowModel<BookmarksWidget> {
           id: b.id,
           historyId: b.historyId,
           savedAt: b.savedAt,
-          title: history?.title ?? 'Unknown item',
-          imgDesc: history?.imgDesc ?? '',
+          title: history?.vendorUrl ?? 'Unknown item',
+          imgDesc: history?.imgUrl ?? '',
         );
       }).toList();
 

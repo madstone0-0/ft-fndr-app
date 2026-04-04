@@ -17,20 +17,20 @@ Map<String, dynamic> _$HistoryRequestBodyToJson(HistoryRequestBody instance) =>
     };
 
 HistoryItem _$HistoryItemFromJson(Map<String, dynamic> json) => HistoryItem(
-      id: json['id'] as String,
+      id: json['hid'] as String,
       userId: json['uid'] as String,
-      title: json['title'] as String,
-      imgDesc: json['imgDesc'] as String,
-      timestamp: DateTime.parse(json['timestamp'] as String),
+      vendorUrl: json['vendorurl'] as String,
+      imgUrl: json['imageurl'] as String,
+      timestamp: DateTime.parse(json['createdat'] as String),
     );
 
 Map<String, dynamic> _$HistoryItemToJson(HistoryItem instance) =>
     <String, dynamic>{
-      'id': instance.id,
+      'hid': instance.id,
       'uid': instance.userId,
-      'title': instance.title,
-      'imgDesc': instance.imgDesc,
-      'timestamp': instance.timestamp.toIso8601String(),
+      'vendorurl': instance.vendorUrl,
+      'imageurl': instance.imgUrl,
+      'createdat': instance.timestamp.toIso8601String(),
     };
 
 HistoryResponse _$HistoryResponseFromJson(Map<String, dynamic> json) =>

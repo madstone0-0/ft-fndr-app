@@ -15,20 +15,24 @@ class HistoryRequestBody {
 
 @JsonSerializable()
 class HistoryItem {
+  @JsonKey(name: 'hid')
   final String id;
 
   @JsonKey(name: 'uid')
   final String userId;
 
-  final String title;
-  final String imgDesc;
+  @JsonKey(name: "vendorurl")
+  final String vendorUrl;
+  @JsonKey(name: "imageurl")
+  final String imgUrl;
+  @JsonKey(name: "createdat")
   final DateTime timestamp;
 
   const HistoryItem({
     required this.id,
     required this.userId,
-    required this.title,
-    required this.imgDesc,
+    required this.vendorUrl,
+    required this.imgUrl,
     required this.timestamp,
   });
 

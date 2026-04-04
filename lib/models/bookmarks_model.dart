@@ -1,7 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
 part "bookmarks_model.g.dart";
-// ─── Bookmarks ────────────────────────────────────────────────────────────────
 
 @JsonSerializable()
 class Bookmark {

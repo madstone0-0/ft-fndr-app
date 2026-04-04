@@ -63,7 +63,7 @@ class _SearchHistoryWidgetState extends State<SearchHistoryWidget> {
   }
 
   Future<void> _loadHistory() async {
-    await _model.loadHistory();
+    await _model.loadHistory(context);
     if (mounted) {
       setState(() {});
     }
@@ -75,7 +75,7 @@ class _SearchHistoryWidgetState extends State<SearchHistoryWidget> {
   }
 
   Future<void> _clearAll() async {
-    await _model.clearHistory();
+    await _model.clearHistory(context);
     await _loadHistory();
   }
 
