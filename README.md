@@ -1,16 +1,34 @@
-# ft_fndr_app
+# Ft Findr App
 
-A new Flutter project.
+Ft Findr is a mobile fashion discovery app that helps users find the same or similar clothing items from nearby or local sellers.
 
-## Getting Started
+This frontend supports the app by handling:
+- photo upload from camera or gallery
+- search results and item discovery flows
+- saved items and search history
+- seller views, maps, and external links
 
-This project is a starting point for a Flutter application.
+## Project Summary
 
-A few resources to get you started if this is your first Flutter project:
+The goal of Ft Findr is to make it easier for people to discover fashion items they like and connect them to local stores, online shops, and social sellers.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+The app focuses on:
+- a simple mobile-first user experience
+- local-first fashion discovery
+- quick navigation between search, results, and saved items
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Core Features
+
+- Capture or upload a photo to start a search
+- View exact or similar fashion item results
+- Save items for later
+- Access search history
+- View seller information and location context
+
+## Architecture
+
+The system is split into two main parts:
+- Flutter mobile frontend
+- Backend with database and image search/API integration
+
+This repository contains the Flutter frontend.
