@@ -3,7 +3,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../screens/bookmarks_widget.dart';
+import '../pages/bookmarks_widget.dart';
 
 class MainShellWidget extends StatelessWidget {
   const MainShellWidget({
