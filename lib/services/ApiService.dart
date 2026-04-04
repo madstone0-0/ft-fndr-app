@@ -62,14 +62,14 @@ abstract class ApiService {
   Future<MessageResponse> createBookmark(@Body() CreateBookmarkRequest request);
 
   @DELETE(bookmarksDeleteRoute)
-  Future<MessageResponse> deleteBookmark(@Path("id") String bookmarkId);
+  Future<MessageResponse> deleteBookmark(@Path("bookmarkId") String bookmarkId);
 
 // History
   @GET(historyGetRoute)
   Future<HistoryResponse> getHistory();
 
   @DELETE(historyDeleteRoute)
-  Future<MessageResponse> deleteHistoryItem(@Path("id") String historyId);
+  Future<MessageResponse> deleteHistoryItem(@Path("historyId") String historyId);
 
   @POST(historyClearRoute)
   Future<MessageResponse> clearHistory();

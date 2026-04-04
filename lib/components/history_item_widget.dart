@@ -10,14 +10,18 @@ export 'history_item_model.dart';
 class HistoryItemWidget extends StatefulWidget {
   const HistoryItemWidget({
     super.key,
-    this.img_desc,
+    this.imgUrl,
     this.title,
     this.timestamp,
+    this.onDelete,
+    this.onRepeat,
   });
 
-  final String? img_desc;
+  final String? imgUrl;
   final String? title;
   final String? timestamp;
+  final VoidCallback? onDelete;
+  final VoidCallback? onRepeat;
 
   @override
   State<HistoryItemWidget> createState() => _HistoryItemWidgetState();
@@ -83,7 +87,7 @@ class _HistoryItemWidgetState extends State<HistoryItemWidget> {
                     fadeInDuration: Duration(milliseconds: 0),
                     fadeOutDuration: Duration(milliseconds: 0),
                     imageUrl: valueOrDefault<String>(
-                      widget.img_desc,
+                      widget.imgUrl,
                       'https://dimg.dreamflow.cloud/v1/image/traditional%20ghanaian%20kente%20fabric%20stole',
                     ),
                     width: 64.0,
@@ -242,9 +246,7 @@ class _HistoryItemWidgetState extends State<HistoryItemWidget> {
                       color: FlutterFlowTheme.of(context).error,
                       size: 20.0,
                     ),
-                    onPressed: () {
-                      print('IconButton pressed ...');
-                    },
+                    onPressed: () => widget.onDelete?.call(),
                   ),
                 ].divide(SizedBox(
                     width:

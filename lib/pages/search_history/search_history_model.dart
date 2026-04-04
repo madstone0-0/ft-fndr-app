@@ -14,12 +14,14 @@ class HistoryGroup {
 }
 
 class HistoryItemData {
-  final String imgDesc;
+  final String id;
+  final String imgUrl;
   final String title;
   final String timestamp;
 
   const HistoryItemData({
-    required this.imgDesc,
+    required this.id,
+    required this.imgUrl,
     required this.title,
     required this.timestamp,
   });
@@ -65,6 +67,19 @@ class SearchHistoryModel extends FlutterFlowModel<SearchHistoryWidget> {
       historyGroups = [];
       _initHistoryItemModels(context);
       status = SearchHistoryStatus.success;
+    } catch (e) {
+      errorMessage = e.toString();
+      status = SearchHistoryStatus.error;
+    }
+  }
+
+  Future<void> deleteHistoryItem(BuildContext context, String historyId) async {
+    status = SearchHistoryStatus.loading;
+    errorMessage = null;
+
+    try {
+      await repo.deleteHistoryItem(historyId);
+      await loadHistory(context);
     } catch (e) {
       errorMessage = e.toString();
       status = SearchHistoryStatus.error;

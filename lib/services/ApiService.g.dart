@@ -204,7 +204,7 @@ class _ApiService implements ApiService {
       Options(method: 'DELETE', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/bookmarks/{bookmarkId}',
+            '/bookmarks/${bookmarkId}',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -258,7 +258,7 @@ class _ApiService implements ApiService {
       Options(method: 'DELETE', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/history/{historyId}',
+            '/history/${historyId}',
             queryParameters: queryParameters,
             data: _data,
           )

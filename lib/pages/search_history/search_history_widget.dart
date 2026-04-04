@@ -221,7 +221,10 @@ class _SearchHistoryWidgetState extends State<SearchHistoryWidget> {
                 model: _model.historyItemModels[modelIndex++],
                 updateCallback: () => setState(() {}),
                 child: HistoryItemWidget(
-                  img_desc: item.imgDesc,
+                  onDelete: () {
+                    _model.deleteHistoryItem(context, item.id);
+                  },
+                  imgUrl: item.imgUrl,
                   title: item.title,
                   timestamp: item.timestamp.toString(),
                 ),

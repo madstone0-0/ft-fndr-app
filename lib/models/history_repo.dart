@@ -80,7 +80,8 @@ class HistoryRepository {
 
   HistoryItemData _toItemData(HistoryItem item) {
     return HistoryItemData(
-      imgDesc: item.imgUrl,
+      id: item.id,
+      imgUrl: item.imgUrl,
       title: item.vendorUrl,
       timestamp: _formatTimestamp(item.timestamp),
     );
