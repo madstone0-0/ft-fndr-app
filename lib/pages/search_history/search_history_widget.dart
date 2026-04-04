@@ -31,6 +31,9 @@ class _SearchHistoryWidgetState extends State<SearchHistoryWidget> {
     _model.textController ??= TextEditingController(text: '');
     _model.textFieldFocusNode ??= FocusNode();
     _authNotifier = getIt<AuthNotifier>();
+    if (_authNotifier.isAuthenticated) {
+      _loadHistory();
+    }
     _authNotifier.addListener(_onAuthStateChanged);
   }
 
@@ -54,7 +57,6 @@ class _SearchHistoryWidgetState extends State<SearchHistoryWidget> {
 
   Future<void> _loadHistory() async {
     await _model.loadHistory();
-    _model.initHistoryItemModels(context);
     if (mounted) safeSetState(() {});
   }
 
@@ -97,7 +99,7 @@ class _SearchHistoryWidgetState extends State<SearchHistoryWidget> {
                 child: HistoryItemWidget(
                   img_desc: item.imgDesc,
                   title: item.title,
-                  timestamp: item.timestamp,
+                  timestamp: item.timestamp.toString(),
                 ),
               ),
           ],
@@ -275,9 +277,8 @@ class _SearchHistoryWidgetState extends State<SearchHistoryWidget> {
                         FlutterFlowTheme.of(context).designToken.spacing.xs),
                     child: GestureDetector(
                       onTap: () async {
-                        // TODO: clear history
-                        await _model.loadHistory();
-                        _model.initHistoryItemModels(context);
+                        await _model.clearHistory();
+                        await _loadHistory();
                         safeSetState(() {});
                       },
                       child: Text(

@@ -58,13 +58,13 @@ abstract class ApiService {
 
   // History
   @GET(historyGetRoute)
-  Future<HistoryResponse> getHistory();
+  Future<HistoryResponse> getHistory(@Body() HistoryRequestBody request);
 
   @DELETE(historyDeleteRoute)
   Future<MessageResponse> deleteHistoryItem(@Path("id") String historyId);
 
   @POST(historyClearRoute)
-  Future<MessageResponse> clearHistory();
+  Future<MessageResponse> clearHistory(@Body() HistoryRequestBody request);
 }
 
 
