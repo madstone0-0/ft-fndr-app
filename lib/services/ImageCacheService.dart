@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:workmanager/workmanager.dart';
 
-class ImageCacheMaintenanceService {
+class ImageCacheService {
   static const String taskIdentifier =
       'com.example.ftFndrApp.imageCacheCleanup';
   static const String taskName = 'image_cache_cleanup';
@@ -51,10 +51,10 @@ void callbackDispatcher() {
     WidgetsFlutterBinding.ensureInitialized();
 
     switch (task) {
-      case ImageCacheMaintenanceService.taskName:
+      case ImageCacheService.taskName:
       case Workmanager.iOSBackgroundTask:
-      case ImageCacheMaintenanceService.taskIdentifier:
-        await ImageCacheMaintenanceService.clearImageCache();
+      case ImageCacheService.taskIdentifier:
+        await ImageCacheService.clearImageCache();
         return true;
       default:
         return true;

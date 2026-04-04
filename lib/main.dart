@@ -6,7 +6,7 @@ import 'package:ft_fndr_app/providers/AuthNotifier.dart';
 import 'package:ft_fndr_app/services/Locator.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import 'flutter_flow/flutter_flow_util.dart';
-import 'services/image_cache_maintenance_service.dart';
+import 'services/ImageCacheService.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,7 +16,7 @@ void main() async {
   // Setup services
   await setupLocatorService();
 
-  await ImageCacheMaintenanceService.initialize();
+  await ImageCacheService.initialize();
   // Initialize Flutter Flow theme
   await FlutterFlowTheme.initialize();
 

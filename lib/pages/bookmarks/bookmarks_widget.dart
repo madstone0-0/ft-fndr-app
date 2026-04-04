@@ -3,15 +3,11 @@ import 'package:ft_fndr_app/services/Locator.dart';
 
 import '/components/bookmark_item_widget.dart';
 import '/components/stat_card_widget.dart';
-import '/flutter_flow/flutter_flow_choice_chips.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import '/flutter_flow/form_field_controller.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 
 import 'bookmarks_model.dart';
 export 'bookmarks_model.dart';
@@ -53,134 +49,144 @@ class _BookmarksWidgetState extends State<BookmarksWidget> {
 
   void _onAuthStateChanged() {
     if (!mounted) return;
-    setState(() {
-      if (_authNotifier.isAuthenticated) {
-        _loadBookmarks();
-      }
-    });
+
+    if (_authNotifier.isAuthenticated) {
+      _loadBookmarks();
+    } else {
+      setState(() {
+        _model.status = BookmarksStatus.initial;
+        _model.bookmarks = [];
+        _model.historyItems = [];
+        _model.errorMessage = null;
+      });
+    }
   }
 
   Future<void> _loadBookmarks() async {
     await _model.loadBookmarks();
     _model.initBookmarkItemModels(context);
-    if (mounted) safeSetState(() {});
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  Future<void> _refresh() async {
+    if (!_authNotifier.isAuthenticated) return;
+    await _loadBookmarks();
   }
 
   Future<void> _deleteBookmark(String bookmarkId) async {
     final success = await _model.deleteBookmark(bookmarkId);
     if (!mounted) return;
+
     if (success) {
-     
       _model.initBookmarkItemModels(context);
-      safeSetState(() {});
+      setState(() {});
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to remove bookmark. Please try again.'),
+          content: const Text('Failed to remove bookmark. Please try again.'),
           backgroundColor: FlutterFlowTheme.of(context).error,
         ),
       );
     }
   }
 
-
-
-  Widget _buildLoginPrompt(BuildContext context) {
+  PreferredSizeWidget _buildAppBar(
+    BuildContext context, {
+    required bool isAuthed,
+  }) {
     final theme = FlutterFlowTheme.of(context);
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.all(theme.designToken.spacing.lg),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.bookmark_rounded, size: 64.0, color: theme.secondaryText),
-            SizedBox(height: theme.designToken.spacing.lg),
-            Text(
-              'Sign in to view your bookmarks',
-              style: theme.headlineSmall.override(
-                font: GoogleFonts.playfairDisplay(fontWeight: FontWeight.w600),
-                fontSize: 20.0,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: theme.designToken.spacing.sm),
-            Text(
-              'Your bookmarks will be saved and synced across devices when you log in.',
-              style: theme.bodyMedium.override(color: theme.secondaryText),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: theme.designToken.spacing.xl),
-            FFButtonWidget(
-              onPressed: () => context.go('/profile'),
-              text: 'Go to Profile',
-              options: FFButtonOptions(
-                width: 200.0,
-                height: 48.0,
-                color: theme.primary,
-                textStyle: theme.titleSmall.override(
-                  font: GoogleFonts.outfit(fontWeight: FontWeight.w600),
-                  color: Colors.white,
-                ),
-                borderRadius:
-                    BorderRadius.circular(theme.designToken.radius.sm),
-              ),
-            ),
-          ],
+
+    return AppBar(
+      backgroundColor: theme.primaryBackground,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      titleSpacing: theme.designToken.spacing.lg,
+      title: Text(
+        'Bookmarks',
+        style: theme.headlineMedium.override(
+          font: GoogleFonts.playfairDisplay(fontWeight: FontWeight.w600),
+          color: theme.primaryText,
+          fontSize: 28.0,
+          fontWeight: FontWeight.w600,
+          lineHeight: 1.25,
         ),
       ),
     );
   }
 
- 
-
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildLoginPrompt(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
-    return Row(
-      mainAxisSize: MainAxisSize.max,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-          'Bookmarks',
-          style: theme.headlineMedium.override(
-            font: GoogleFonts.playfairDisplay(
-              fontWeight: FontWeight.bold,
-              fontStyle: theme.headlineMedium.fontStyle,
+
+    return RefreshIndicator(
+      onRefresh: () async {},
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.all(theme.designToken.spacing.lg),
+        children: [
+          SizedBox(height: MediaQuery.of(context).size.height * 0.15),
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.bookmark_rounded,
+                  size: 64.0,
+                  color: theme.secondaryText,
+                ),
+                SizedBox(height: theme.designToken.spacing.lg),
+                Text(
+                  'Sign in to view your bookmarks',
+                  style: theme.headlineSmall.override(
+                    font: GoogleFonts.playfairDisplay(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    fontSize: 20.0,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: theme.designToken.spacing.sm),
+                Text(
+                  'Your bookmarks will be saved and synced across devices when you log in.',
+                  style: theme.bodyMedium.override(
+                    color: theme.secondaryText,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: theme.designToken.spacing.xl),
+                FFButtonWidget(
+                  onPressed: () => context.go('/profile'),
+                  text: 'Go to Profile',
+                  options: FFButtonOptions(
+                    width: 200.0,
+                    height: 48.0,
+                    color: theme.primary,
+                    textStyle: theme.titleSmall.override(
+                      font: GoogleFonts.outfit(fontWeight: FontWeight.w600),
+                      color: Colors.white,
+                    ),
+                    borderRadius: BorderRadius.circular(theme.designToken.radius.sm),
+                  ),
+                ),
+              ],
             ),
-            color: theme.primaryText,
-            fontSize: 28.0,
-            letterSpacing: 0.0,
-            fontWeight: FontWeight.bold,
-            fontStyle: theme.headlineMedium.fontStyle,
-            lineHeight: 1.25,
           ),
-        ),
-        Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: theme.secondaryBackground,
-            borderRadius:
-                BorderRadius.circular(theme.designToken.radius.md),
-            border: Border.all(color: theme.divider, width: 1),
-          ),
-          alignment: AlignmentDirectional(0, 0),
-          child: Icon(Icons.menu_rounded, color: theme.primaryText, size: 24),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
-
   Widget _buildStats(BuildContext context) {
     final spacing = FlutterFlowTheme.of(context).designToken.spacing.md;
+
     return Row(
       mainAxisSize: MainAxisSize.max,
       children: [
         Expanded(
           child: wrapWithModel(
             model: _model.statCardModel1,
-            updateCallback: () => safeSetState(() {}),
+            updateCallback: () => setState(() {}),
             child: StatCardWidget(
               count: _model.historyItems.length.toDouble(),
               label: 'SEARCHES',
@@ -191,7 +197,7 @@ class _BookmarksWidgetState extends State<BookmarksWidget> {
         Expanded(
           child: wrapWithModel(
             model: _model.statCardModel2,
-            updateCallback: () => safeSetState(() {}),
+            updateCallback: () => setState(() {}),
             child: StatCardWidget(
               count: _model.savedCount.toDouble(),
               label: 'SAVED',
@@ -202,7 +208,7 @@ class _BookmarksWidgetState extends State<BookmarksWidget> {
         Expanded(
           child: wrapWithModel(
             model: _model.statCardModel3,
-            updateCallback: () => safeSetState(() {}),
+            updateCallback: () => setState(() {}),
             child: StatCardWidget(
               count: _model.sitesCount.toDouble(),
               label: 'ITEMS',
@@ -212,7 +218,6 @@ class _BookmarksWidgetState extends State<BookmarksWidget> {
       ],
     );
   }
-
 
   Widget _buildBookmarksList(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
@@ -241,7 +246,7 @@ class _BookmarksWidgetState extends State<BookmarksWidget> {
         for (int i = 0; i < _model.bookmarks.length; i++)
           wrapWithModel(
             model: _model.bookmarkItemModels[i],
-            updateCallback: () => safeSetState(() {}),
+            updateCallback: () => setState(() {}),
             child: BookmarkItemWidget(
               img_bg: _model.bookmarks[i].colourHex,
               site: _model.bookmarks[i].title,
@@ -254,11 +259,11 @@ class _BookmarksWidgetState extends State<BookmarksWidget> {
     );
   }
 
-
   Widget _buildPastSearches(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
     final spacing = theme.designToken.spacing;
     final items = _model.historyItems;
+
     if (items.isEmpty) return const SizedBox.shrink();
 
     return Column(
@@ -293,6 +298,7 @@ class _BookmarksWidgetState extends State<BookmarksWidget> {
   Widget _buildChip(BuildContext context, String label) {
     final theme = FlutterFlowTheme.of(context);
     final spacing = theme.designToken.spacing;
+
     return Container(
       decoration: BoxDecoration(
         color: theme.secondaryBackground,
@@ -301,7 +307,9 @@ class _BookmarksWidgetState extends State<BookmarksWidget> {
       ),
       child: Padding(
         padding: EdgeInsets.symmetric(
-            horizontal: spacing.lg, vertical: spacing.sm),
+          horizontal: spacing.lg,
+          vertical: spacing.sm,
+        ),
         child: Text(
           label,
           style: theme.bodySmall.override(
@@ -313,131 +321,113 @@ class _BookmarksWidgetState extends State<BookmarksWidget> {
     );
   }
 
-
   Widget _buildStatusBody(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
-    return switch (_model.status) {
-      BookmarksStatus.initial ||
-      BookmarksStatus.loading =>
-        const Center(child: CircularProgressIndicator()),
-      BookmarksStatus.error => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.error_outline_rounded,
-                  color: theme.error, size: 48.0),
-              const SizedBox(height: 12.0),
-              Text(
-                _model.errorMessage ?? 'Something went wrong.',
-                style: theme.bodyMedium.override(
-                  font: GoogleFonts.outfit(),
-                  color: theme.secondaryText,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 12.0),
-              TextButton(
-                  onPressed: _loadBookmarks, child: const Text('Retry')),
-            ],
-          ),
-        ),
-      BookmarksStatus.empty => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.bookmark_border_rounded,
-                  size: 64.0, color: theme.secondaryText),
-              SizedBox(height: theme.designToken.spacing.lg),
-              Text(
-                'No bookmarks yet',
-                style: theme.headlineSmall.override(
-                  font: GoogleFonts.playfairDisplay(
-                      fontWeight: FontWeight.w600),
-                  fontSize: 20.0,
+
+    return RefreshIndicator(
+      onRefresh: _refresh,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.all(theme.designToken.spacing.lg),
+        children: [
+          SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+          switch (_model.status) {
+            BookmarksStatus.initial || BookmarksStatus.loading => const Center(child: CircularProgressIndicator()),
+            BookmarksStatus.error => Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.error_outline_rounded,
+                      color: theme.error,
+                      size: 48.0,
+                    ),
+                    const SizedBox(height: 12.0),
+                    Text(
+                      _model.errorMessage ?? 'Something went wrong.',
+                      style: theme.bodyMedium.override(
+                        font: GoogleFonts.outfit(),
+                        color: theme.secondaryText,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12.0),
+                    TextButton(
+                      onPressed: _loadBookmarks,
+                      child: const Text('Retry'),
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(height: theme.designToken.spacing.sm),
-              Text(
-                'Save items from your search results to find them here.',
-                style: theme.bodyMedium.override(color: theme.secondaryText),
-                textAlign: TextAlign.center,
+            BookmarksStatus.empty => Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.bookmark_border_rounded,
+                      size: 64.0,
+                      color: theme.secondaryText,
+                    ),
+                    SizedBox(height: theme.designToken.spacing.lg),
+                    Text(
+                      'No bookmarks yet',
+                      style: theme.headlineSmall.override(
+                        font: GoogleFonts.playfairDisplay(
+                          fontWeight: FontWeight.w600,
+                        ),
+                        fontSize: 20.0,
+                      ),
+                    ),
+                    SizedBox(height: theme.designToken.spacing.sm),
+                    Text(
+                      'Save items from your search results to find them here.',
+                      style: theme.bodyMedium.override(
+                        color: theme.secondaryText,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
-        ),
-      BookmarksStatus.success => const SizedBox.shrink(),
-    };
+            BookmarksStatus.success => const SizedBox.shrink(),
+          },
+        ],
+      ),
+    );
   }
 
+  Widget _buildContent(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    final spacing = theme.designToken.spacing;
+
+    return RefreshIndicator(
+      onRefresh: _refresh,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.all(spacing.lg),
+        children: [
+          _buildStats(context),
+          SizedBox(height: spacing.lg),
+          _buildBookmarksList(context),
+          SizedBox(height: spacing.lg),
+          _buildPastSearches(context),
+          const SizedBox(height: 80),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final spacing = FlutterFlowTheme.of(context).designToken.spacing;
-
-  
-    if (!_authNotifier.isAuthenticated) {
-      return Column(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(
-                spacing.lg, spacing.md, spacing.lg, spacing.md),
-            child: Row(children: [
-              Text(
-                'Bookmarks',
-                style: FlutterFlowTheme.of(context).headlineMedium.override(
-                      font: GoogleFonts.playfairDisplay(
-                          fontWeight: FontWeight.bold),
-                      color: FlutterFlowTheme.of(context).primaryText,
-                      fontSize: 28.0,
-                      fontWeight: FontWeight.bold,
-                      lineHeight: 1.25,
-                    ),
-              ),
-            ]),
-          ),
-          Expanded(child: _buildLoginPrompt(context)),
-        ],
-      );
-    }
-
+    final isAuthed = _authNotifier.isAuthenticated;
 
     return Scaffold(
       key: scaffoldKey,
       backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-      body: Padding(
-        padding: EdgeInsets.all(spacing.lg),
-        child: SingleChildScrollView(
-          primary: false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              _buildHeader(context),
-              SizedBox(height: spacing.lg),
-
-              if (_model.status == BookmarksStatus.success ||
-                  _model.status == BookmarksStatus.empty) ...[
-                _buildStats(context),
-                SizedBox(height: spacing.lg),
-              ],
-
-          
-              if (_model.status != BookmarksStatus.success)
-                SizedBox(height: 200, child: _buildStatusBody(context)),
-
-            
-              if (_model.status == BookmarksStatus.success) ...[
-                _buildBookmarksList(context),
-                SizedBox(height: spacing.lg),
-                _buildPastSearches(context),
-              ],
-
-              const SizedBox(height: 80),
-            ],
-          ),
-        ),
-      ),
+      appBar: _buildAppBar(context, isAuthed: isAuthed),
+      body: !isAuthed
+          ? _buildLoginPrompt(context)
+          : (_model.status == BookmarksStatus.success ? _buildContent(context) : _buildStatusBody(context)),
     );
   }
 }
