@@ -6,6 +6,16 @@ part of 'history_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+HistoryRequestBody _$HistoryRequestBodyFromJson(Map<String, dynamic> json) =>
+    HistoryRequestBody(
+      user: User.fromJson(json['user'] as Map<String, dynamic>),
+    );
+
+Map<String, dynamic> _$HistoryRequestBodyToJson(HistoryRequestBody instance) =>
+    <String, dynamic>{
+      'user': instance.user,
+    };
+
 HistoryItem _$HistoryItemFromJson(Map<String, dynamic> json) => HistoryItem(
       id: json['id'] as String,
       userId: json['uid'] as String,

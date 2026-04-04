@@ -195,11 +195,12 @@ class _ApiService implements ApiService {
   }
 
   @override
-  Future<HistoryResponse> getHistory() async {
+  Future<HistoryResponse> getHistory(HistoryRequestBody request) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final _data = <String, dynamic>{};
+    _data.addAll(request.toJson());
     final _options = _setStreamType<HistoryResponse>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
@@ -249,11 +250,12 @@ class _ApiService implements ApiService {
   }
 
   @override
-  Future<MessageResponse> clearHistory() async {
+  Future<MessageResponse> clearHistory(HistoryRequestBody request) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final _data = <String, dynamic>{};
+    _data.addAll(request.toJson());
     final _options = _setStreamType<MessageResponse>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
