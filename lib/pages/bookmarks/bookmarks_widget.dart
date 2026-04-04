@@ -70,7 +70,7 @@ class _BookmarksWidgetState extends State<BookmarksWidget> {
     final success = await _model.deleteBookmark(bookmarkId);
     if (!mounted) return;
     if (success) {
-      // Re-sync sub-models to match the new list length
+     
       _model.initBookmarkItemModels(context);
       safeSetState(() {});
     } else {
@@ -83,7 +83,7 @@ class _BookmarksWidgetState extends State<BookmarksWidget> {
     }
   }
 
-  // ── Unauthenticated prompt ────────────────────────────────────────────────
+
 
   Widget _buildLoginPrompt(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
@@ -131,7 +131,7 @@ class _BookmarksWidgetState extends State<BookmarksWidget> {
     );
   }
 
-  // ── Header ────────────────────────────────────────────────────────────────
+ 
 
   Widget _buildHeader(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
@@ -171,7 +171,6 @@ class _BookmarksWidgetState extends State<BookmarksWidget> {
     );
   }
 
-  // ── Stat cards ────────────────────────────────────────────────────────────
 
   Widget _buildStats(BuildContext context) {
     final spacing = FlutterFlowTheme.of(context).designToken.spacing.md;
@@ -214,7 +213,6 @@ class _BookmarksWidgetState extends State<BookmarksWidget> {
     );
   }
 
-  // ── Bookmark list ─────────────────────────────────────────────────────────
 
   Widget _buildBookmarksList(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
@@ -256,7 +254,6 @@ class _BookmarksWidgetState extends State<BookmarksWidget> {
     );
   }
 
-  // ── Past searches chips ───────────────────────────────────────────────────
 
   Widget _buildPastSearches(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
@@ -316,7 +313,6 @@ class _BookmarksWidgetState extends State<BookmarksWidget> {
     );
   }
 
-  // ── Loading / error / empty states ────────────────────────────────────────
 
   Widget _buildStatusBody(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
@@ -373,13 +369,12 @@ class _BookmarksWidgetState extends State<BookmarksWidget> {
     };
   }
 
-  // ── Build ─────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
     final spacing = FlutterFlowTheme.of(context).designToken.spacing;
 
-    // Unauthenticated — lives inside the shell, no Scaffold
+  
     if (!_authNotifier.isAuthenticated) {
       return Column(
         mainAxisSize: MainAxisSize.max,
@@ -406,7 +401,7 @@ class _BookmarksWidgetState extends State<BookmarksWidget> {
       );
     }
 
-    // Authenticated
+
     return Scaffold(
       key: scaffoldKey,
       backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
@@ -421,18 +416,17 @@ class _BookmarksWidgetState extends State<BookmarksWidget> {
               _buildHeader(context),
               SizedBox(height: spacing.lg),
 
-              // Stats — visible once we have real data
               if (_model.status == BookmarksStatus.success ||
                   _model.status == BookmarksStatus.empty) ...[
                 _buildStats(context),
                 SizedBox(height: spacing.lg),
               ],
 
-              // Loading / error / empty placeholder
+          
               if (_model.status != BookmarksStatus.success)
                 SizedBox(height: 200, child: _buildStatusBody(context)),
 
-              // Live data sections
+            
               if (_model.status == BookmarksStatus.success) ...[
                 _buildBookmarksList(context),
                 SizedBox(height: spacing.lg),
