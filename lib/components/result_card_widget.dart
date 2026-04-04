@@ -1,20 +1,22 @@
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'result_card_model.dart';
-export 'result_card_model.dart';
+import 'package:ft_fndr_app/components/result_card_model.dart';
+import 'package:ft_fndr_app/flutter_flow/flutter_flow_model.dart';
+import 'package:ft_fndr_app/flutter_flow/flutter_flow_theme.dart';
+import 'package:ft_fndr_app/flutter_flow/flutter_flow_util.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ResultCardWidget extends StatefulWidget {
   const ResultCardWidget({
     super.key,
-    this.img_bg,
+    this.imgUrl,
     this.title,
     this.url,
     this.type,
   });
 
-  final String? img_bg;
+  final String? imgUrl;
   final String? title;
   final String? url;
   final String? type;
@@ -27,12 +29,6 @@ class _ResultCardWidgetState extends State<ResultCardWidget> {
   late ResultCardModel _model;
 
   @override
-  void setState(VoidCallback callback) {
-    super.setState(callback);
-    _model.onUpdate();
-  }
-
-  @override
   void initState() {
     super.initState();
     _model = createModel(context, () => ResultCardModel());
@@ -41,126 +37,99 @@ class _ResultCardWidgetState extends State<ResultCardWidget> {
   @override
   void dispose() {
     _model.maybeDispose();
-
     super.dispose();
+  }
+
+  Future<void> _openUrl() async {
+    final url = widget.url;
+    if (url == null || url.isEmpty) return;
+
+    final uri = Uri.tryParse(url);
+    if (uri != null) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+
     return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(
-          0.0, 0.0, 0.0, FlutterFlowTheme.of(context).designToken.spacing.md),
-      child: Container(
-        decoration: BoxDecoration(
-          color: FlutterFlowTheme.of(context).secondaryBackground,
-          borderRadius: BorderRadius.circular(
-              FlutterFlowTheme.of(context).designToken.radius.lg),
-          border: Border.all(
-            color: FlutterFlowTheme.of(context).divider,
-            width: 1.0,
+      padding: EdgeInsets.only(bottom: theme.designToken.spacing.md),
+      child: GestureDetector(
+        onTap: _openUrl, // whole card clickable
+        child: Container(
+          decoration: BoxDecoration(
+            color: theme.secondaryBackground,
+            borderRadius: BorderRadius.circular(theme.designToken.radius.lg),
+            border: Border.all(color: theme.divider),
           ),
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(
-              FlutterFlowTheme.of(context).designToken.spacing.md),
-          child: Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 64.0,
-                height: 64.0,
-                decoration: BoxDecoration(
-                  color: Color(0xFFC89E6E),
-                  borderRadius: BorderRadius.circular(
-                      FlutterFlowTheme.of(context).designToken.radius.md),
+              // 🔹 IMAGE (prominent)
+              ClipRRect(
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(theme.designToken.radius.lg),
+                ),
+                child: SizedBox(
+                  height: 180,
+                  width: double.infinity,
+                  child: widget.imgUrl != null && widget.imgUrl!.isNotEmpty
+                      ? CachedNetworkImage(
+                    imageUrl: widget.imgUrl!,
+                    fit: BoxFit.cover,
+                    placeholder: (_, __) => Container(
+                      color: Colors.grey[200],
+                    ),
+                    errorWidget: (_, __, ___) => Container(
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.image_not_supported),
+                    ),
+                  )
+                      : Container(
+                    color: Colors.grey[300],
+                    child: const Icon(Icons.image),
+                  ),
                 ),
               ),
-              Expanded(
-                flex: 1,
+
+              // 🔹 CONTENT
+              Padding(
+                padding: EdgeInsets.all(theme.designToken.spacing.md),
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      valueOrDefault<String>(
-                        widget.title,
-                        'jumia.com.gh',
-                      ),
+                      valueOrDefault(widget.title, 'jumia.com.gh'),
                       maxLines: 1,
-                      style: FlutterFlowTheme.of(context).titleMedium.override(
-                            font: GoogleFonts.outfit(
-                              fontWeight: FontWeight.bold,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .titleMedium
-                                  .fontStyle,
-                            ),
-                            color: FlutterFlowTheme.of(context).primaryText,
-                            fontSize: 17.0,
-                            letterSpacing: 0.0,
-                            fontWeight: FontWeight.bold,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .titleMedium
-                                .fontStyle,
-                            lineHeight: 1.35,
-                          ),
                       overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      valueOrDefault<String>(
-                        widget.url,
-                        'https://group.jumia.com/',
+                      style: theme.titleMedium.override(
+                        fontWeight: FontWeight.bold,
                       ),
-                      maxLines: 1,
-                      style: FlutterFlowTheme.of(context).bodySmall.override(
-                            font: GoogleFonts.outfit(
-                              fontWeight: FontWeight.normal,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .bodySmall
-                                  .fontStyle,
-                            ),
-                            color: FlutterFlowTheme.of(context).secondaryText,
-                            fontSize: 13.0,
-                            letterSpacing: 0.0,
-                            fontWeight: FontWeight.normal,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .bodySmall
-                                .fontStyle,
-                            lineHeight: 1.38,
-                          ),
-                      overflow: TextOverflow.ellipsis,
                     ),
-                    Text(
-                      valueOrDefault<String>(
-                        widget.type,
-                        'Online store',
+
+                    GestureDetector(
+                      onTap: _openUrl,
+                      child: Text(
+                        valueOrDefault(widget.url, ''),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.bodySmall.override(
+                          color: theme.primary, // clickable look
+                          decoration: TextDecoration.underline,
+                        ),
                       ),
-                      style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font: GoogleFonts.outfit(
-                              fontWeight: FontWeight.normal,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .fontStyle,
-                            ),
-                            color: FlutterFlowTheme.of(context).primaryText,
-                            fontSize: 15.0,
-                            letterSpacing: 0.0,
-                            fontWeight: FontWeight.normal,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .fontStyle,
-                            lineHeight: 1.47,
-                          ),
                     ),
-                  ].divide(SizedBox(
-                      height:
-                          FlutterFlowTheme.of(context).designToken.spacing.xs)),
+
+                    Text(
+                      valueOrDefault(widget.type, 'Web page'),
+                      style: theme.bodyMedium,
+                    ),
+                  ].divide(SizedBox(height: theme.designToken.spacing.xs)),
                 ),
               ),
-            ].divide(SizedBox(
-                width: FlutterFlowTheme.of(context).designToken.spacing.md)),
+            ],
           ),
         ),
       ),

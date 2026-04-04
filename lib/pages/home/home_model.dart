@@ -1,3 +1,5 @@
+import 'package:ft_fndr_app/services/Locator.dart';
+
 import '/components/recent_search_card_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -10,7 +12,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 class HomeModel extends FlutterFlowModel<HomeWidget> {
-  ///  State fields for stateful widgets in this page.
 
   // Model for RecentSearchCard component.
   late RecentSearchCardModel recentSearchCardModel1;
@@ -40,4 +41,5 @@ class HomeModel extends FlutterFlowModel<HomeWidget> {
     recentSearchCardModel3.dispose();
     recentSearchCardModel4.dispose();
   }
+
 }
