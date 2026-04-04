@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:ft_fndr_app/providers/AuthNotifier.dart';
 import 'package:ft_fndr_app/services/Locator.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import 'flutter_flow/flutter_flow_util.dart';
@@ -10,9 +11,15 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   GoRouter.optionURLReflectsImperativeAPIs = true;
   usePathUrlStrategy();
-  setupLocatorService();
 
+  // Setup services
+  await setupLocatorService();
+
+  // Initialize Flutter Flow theme
   await FlutterFlowTheme.initialize();
+
+  // Initialize auth state
+  await getIt<AuthNotifier>().initialize();
 
   runApp(MyApp());
 }
