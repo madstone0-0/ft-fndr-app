@@ -23,8 +23,6 @@ class HistoryRepository {
     await api.clearHistory();
   }
 
-  // ── Grouping logic ────────────────────────────────────────────────────────
-
   List<HistoryGroup> _groupByDate(List<HistoryItem> items) {
     if (items.isEmpty) return [];
 
@@ -36,7 +34,7 @@ class HistoryRepository {
     final yesterday = today.subtract(const Duration(days: 1));
     final startOfWeek = today.subtract(Duration(days: today.weekday - 1));
 
-    // Bucket items by label
+    // Group items by label
     final Map<String, List<HistoryItem>> buckets = {};
 
     for (final item in sorted) {
@@ -70,7 +68,6 @@ class HistoryRepository {
     if (date == yesterday) return 'Yesterday';
     if (!date.isBefore(startOfWeek)) return 'Earlier this week';
 
-    // Older items: group by "Month Year" e.g. "March 2025"
     const months = [
       'January', 'February', 'March', 'April', 'May', 'June',
       'July', 'August', 'September', 'October', 'November', 'December',
@@ -98,10 +95,8 @@ class HistoryRepository {
     final hour12 = hour % 12 == 0 ? 12 : hour % 12;
     final timeStr = '$hour12:$minute $period';
 
-    // Today → "10:45 AM"
     if (date == today) return timeStr;
 
-    // Older → "Oct 23, 4:20 PM"
     const months = [
       'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',

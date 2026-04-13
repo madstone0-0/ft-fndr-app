@@ -105,6 +105,13 @@ class AuthNotifier extends ChangeNotifier {
   }
 
   String _extractErrorMessage(dynamic error) {
+    if (error.response != null) {
+      final msg = error.response.data["message"];
+      if (msg != null && msg is String) {
+        return msg;
+      }
+    }
+
     if (error.toString().contains('SocketException')) {
       return 'No internet connection';
     } else if (error.toString().contains('401')) {

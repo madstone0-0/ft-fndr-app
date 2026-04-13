@@ -1,1 +1,1 @@
-export '/pages/shell/main_shell_widget.dart' show MainShellWidget;
+export '/pages/shell/shell_widget.dart' show ShellWidget;

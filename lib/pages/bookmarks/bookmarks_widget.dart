@@ -1,3 +1,4 @@
+import 'package:ft_fndr_app/components/app_bar_widget.dart';
 import 'package:ft_fndr_app/providers/AuthNotifier.dart';
 import 'package:ft_fndr_app/services/Locator.dart';
 
@@ -90,30 +91,6 @@ class _BookmarksWidgetState extends State<BookmarksWidget> {
         ),
       );
     }
-  }
-
-  PreferredSizeWidget _buildAppBar(
-    BuildContext context, {
-    required bool isAuthed,
-  }) {
-    final theme = FlutterFlowTheme.of(context);
-
-    return AppBar(
-      backgroundColor: theme.primaryBackground,
-      elevation: 0,
-      scrolledUnderElevation: 0,
-      titleSpacing: theme.designToken.spacing.lg,
-      title: Text(
-        'Bookmarks',
-        style: theme.headlineMedium.override(
-          font: GoogleFonts.playfairDisplay(fontWeight: FontWeight.w600),
-          color: theme.primaryText,
-          fontSize: 28.0,
-          fontWeight: FontWeight.w600,
-          lineHeight: 1.25,
-        ),
-      ),
-    );
   }
 
   Widget _buildLoginPrompt(BuildContext context) {
@@ -248,7 +225,7 @@ class _BookmarksWidgetState extends State<BookmarksWidget> {
             model: _model.bookmarkItemModels[i],
             updateCallback: () => setState(() {}),
             child: BookmarkItemWidget(
-              img_bg: _model.bookmarks[i].colourHex,
+              imgUrl: _model.bookmarks[i].colourHex,
               site: _model.bookmarks[i].title,
               url: _model.bookmarks[i].imgDesc,
               time: _model.bookmarks[i].savedLabel,
@@ -424,7 +401,7 @@ class _BookmarksWidgetState extends State<BookmarksWidget> {
     return Scaffold(
       key: scaffoldKey,
       backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-      appBar: _buildAppBar(context, isAuthed: isAuthed),
+      appBar: const AppPageBar(title: "Bookmarks"),
       body: !isAuthed
           ? _buildLoginPrompt(context)
           : (_model.status == BookmarksStatus.success ? _buildContent(context) : _buildStatusBody(context)),

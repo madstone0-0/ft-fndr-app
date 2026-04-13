@@ -8,14 +8,14 @@ export 'bookmark_item_model.dart';
 class BookmarkItemWidget extends StatefulWidget {
   const BookmarkItemWidget({
     super.key,
-    this.img_bg,
+    this.imgUrl,
     this.site,
     this.url,
     this.time,
     required Future<void> Function() onDelete,
   });
 
-  final String? img_bg;
+  final String? imgUrl;
   final String? site;
   final String? url;
   final String? time;

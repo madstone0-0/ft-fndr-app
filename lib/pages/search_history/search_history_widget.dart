@@ -1,3 +1,4 @@
+import 'package:ft_fndr_app/components/app_bar_widget.dart';
 import 'package:ft_fndr_app/providers/AuthNotifier.dart';
 
 import '/components/history_item_widget.dart';
@@ -76,61 +77,9 @@ class _SearchHistoryWidgetState extends State<SearchHistoryWidget> {
 
   Future<void> _clearAll() async {
     await _model.clearHistory(context);
-    await _loadHistory();
-  }
-
-  PreferredSizeWidget _buildAppBar(
-    BuildContext context, {
-    required bool showClearAction,
-  }) {
-    final theme = FlutterFlowTheme.of(context);
-
-    return AppBar(
-      backgroundColor: theme.primaryBackground,
-      elevation: 0,
-      scrolledUnderElevation: 0,
-      titleSpacing: theme.designToken.spacing.lg,
-      title: Text(
-        'Search History',
-        style: theme.headlineMedium.override(
-          font: GoogleFonts.playfairDisplay(fontWeight: FontWeight.w600),
-          color: theme.primaryText,
-          fontSize: 28.0,
-          fontWeight: FontWeight.w600,
-          lineHeight: 1.25,
-        ),
-      ),
-      actions: [
-        if (showClearAction)
-          Padding(
-            padding: EdgeInsets.only(
-              right: theme.designToken.spacing.lg,
-            ),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(theme.designToken.radius.sm),
-              onTap: _clearAll,
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: theme.designToken.spacing.sm,
-                  vertical: theme.designToken.spacing.xs,
-                ),
-                child: Center(
-                  child: Text(
-                    'Clear All',
-                    style: theme.labelMedium.override(
-                      font: GoogleFonts.outfit(fontWeight: FontWeight.w600),
-                      color: theme.primary,
-                      fontSize: 13.0,
-                      fontWeight: FontWeight.w600,
-                      lineHeight: 1.38,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Widget _buildSearchBar(BuildContext context) {
@@ -221,8 +170,13 @@ class _SearchHistoryWidgetState extends State<SearchHistoryWidget> {
                 model: _model.historyItemModels[modelIndex++],
                 updateCallback: () => setState(() {}),
                 child: HistoryItemWidget(
-                  onDelete: () {
-                    _model.deleteHistoryItem(context, item.id);
+                  onDelete: () async {
+                    await _model.deleteHistoryItem(context, item.id);
+                    setState(() {});
+                  },
+                  onBookmark: () async {
+                    await _model.bookmarkHistoryItem(context, item.id);
+                    setState(() {});
                   },
                   imgUrl: item.imgUrl,
                   title: item.title,
@@ -267,37 +221,41 @@ class _SearchHistoryWidgetState extends State<SearchHistoryWidget> {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: EdgeInsets.all(theme.designToken.spacing.lg),
         children: [
-          SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+          SizedBox(height: MediaQuery
+              .of(context)
+              .size
+              .height * 0.2),
           switch (status) {
             SearchHistoryStatus.loading ||
             SearchHistoryStatus.initial =>
-              const Center(child: CircularProgressIndicator()),
-            SearchHistoryStatus.error => Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.error_outline_rounded,
-                      color: theme.error,
-                      size: 48.0,
-                    ),
-                    const SizedBox(height: 12.0),
-                    Text(
-                      _model.errorMessage ?? 'Something went wrong.',
-                      style: theme.bodyMedium.override(
-                        font: GoogleFonts.outfit(),
-                        color: theme.secondaryText,
+            const Center(child: CircularProgressIndicator()),
+            SearchHistoryStatus.error =>
+                Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.error_outline_rounded,
+                        color: theme.error,
+                        size: 48.0,
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 12.0),
-                    TextButton(
-                      onPressed: _loadHistory,
-                      child: const Text('Retry'),
-                    ),
-                  ],
+                      const SizedBox(height: 12.0),
+                      Text(
+                        _model.errorMessage ?? 'Something went wrong.',
+                        style: theme.bodyMedium.override(
+                          font: GoogleFonts.outfit(),
+                          color: theme.secondaryText,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 12.0),
+                      TextButton(
+                        onPressed: _loadHistory,
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
             _ => const SizedBox.shrink(),
           },
         ],
@@ -314,7 +272,10 @@ class _SearchHistoryWidgetState extends State<SearchHistoryWidget> {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: EdgeInsets.all(theme.designToken.spacing.lg),
         children: [
-          SizedBox(height: MediaQuery.of(context).size.height * 0.15),
+          SizedBox(height: MediaQuery
+              .of(context)
+              .size
+              .height * 0.15),
           Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -389,10 +350,20 @@ class _SearchHistoryWidgetState extends State<SearchHistoryWidget> {
     final isAuthed = _authNotifier.isAuthenticated;
 
     return Scaffold(
-      backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-      appBar: _buildAppBar(
-        context,
-        showClearAction: isAuthed,
+      backgroundColor: FlutterFlowTheme
+          .of(context)
+          .primaryBackground,
+      appBar: AppPageBar(
+        title: 'Search History',
+        action: isAuthed
+            ? AppPageBarAction(
+          label: 'Clear All',
+          onTap: _clearAll,
+          color: FlutterFlowTheme
+              .of(context)
+              .primary,
+        )
+            : null,
       ),
       body: isAuthed ? _buildAuthenticatedBody(context) : _buildSignedOutBody(context),
     );

@@ -23,7 +23,7 @@ void main() async {
   // Initialize auth state
   await getIt<AuthNotifier>().initialize();
 
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {

@@ -15,6 +15,7 @@ class HistoryItemWidget extends StatefulWidget {
     this.timestamp,
     this.onDelete,
     this.onRepeat,
+    this.onBookmark
   });
 
   final String? imgUrl;
@@ -22,6 +23,7 @@ class HistoryItemWidget extends StatefulWidget {
   final String? timestamp;
   final VoidCallback? onDelete;
   final VoidCallback? onRepeat;
+  final VoidCallback? onBookmark;
 
   @override
   State<HistoryItemWidget> createState() => _HistoryItemWidgetState();
@@ -159,85 +161,14 @@ class _HistoryItemWidgetState extends State<HistoryItemWidget> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      borderRadius: BorderRadius.circular(
-                          FlutterFlowTheme.of(context).designToken.radius.sm),
+                  FlutterFlowIconButton(
+                    buttonSize: 40.0,
+                    icon: Icon(
+                      Icons.bookmark_outline_rounded,
+                      color: FlutterFlowTheme.of(context).primary,
+                      size: 20.0,
                     ),
-                    child: Align(
-                      alignment: AlignmentDirectional(0.0, 0.0),
-                      child: Stack(
-                        alignment: AlignmentDirectional(0.0, 0.0),
-                        children: [
-                          Container(
-                            child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
-                                  FlutterFlowTheme.of(context)
-                                      .designToken
-                                      .spacing
-                                      .md,
-                                  FlutterFlowTheme.of(context)
-                                      .designToken
-                                      .spacing
-                                      .xs,
-                                  FlutterFlowTheme.of(context)
-                                      .designToken
-                                      .spacing
-                                      .md,
-                                  FlutterFlowTheme.of(context)
-                                      .designToken
-                                      .spacing
-                                      .xs),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.refresh_rounded,
-                                    color: FlutterFlowTheme.of(context).primary,
-                                    size: 16.0,
-                                  ),
-                                  Text(
-                                    'Repeat',
-                                    style: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .override(
-                                          font: GoogleFonts.outfit(
-                                            fontWeight: FontWeight.w600,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelMedium
-                                                    .fontStyle,
-                                          ),
-                                          color: FlutterFlowTheme.of(context)
-                                              .primary,
-                                          fontSize: 13.0,
-                                          letterSpacing: 0.0,
-                                          fontWeight: FontWeight.w600,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .labelMedium
-                                                  .fontStyle,
-                                          lineHeight: 1.38,
-                                        ),
-                                  ),
-                                  Container(
-                                    width: 0.0,
-                                    height: 0.0,
-                                  ),
-                                ].divide(SizedBox(width: 8.0)),
-                              ),
-                            ),
-                          ),
-                          Container(
-                            width: 0.0,
-                            height: 0.0,
-                          ),
-                        ],
-                      ),
-                    ),
+                    onPressed: () => widget.onBookmark?.call(),
                   ),
                   FlutterFlowIconButton(
                     buttonSize: 40.0,

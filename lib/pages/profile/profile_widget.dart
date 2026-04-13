@@ -1,3 +1,4 @@
+import 'package:ft_fndr_app/components/app_bar_widget.dart';
 import 'package:ft_fndr_app/providers/AuthNotifier.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -49,8 +50,6 @@ class _ProfileWidgetState extends State<ProfileWidget> {
     if (mounted) setState(() {});
   }
 
-  // ── Helpers ──────────────────────────────────────────────────────────────
-
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
@@ -58,11 +57,11 @@ class _ProfileWidgetState extends State<ProfileWidget> {
   }
 
   InputDecoration _fieldDecoration(
-    BuildContext context,
-    String label,
-    String hint, {
-    Widget? suffixIcon,
-  }) {
+      BuildContext context,
+      String label,
+      String hint, {
+        Widget? suffixIcon,
+      }) {
     final theme = FlutterFlowTheme.of(context);
     final radius = BorderRadius.circular(theme.designToken.radius.sm);
     return InputDecoration(
@@ -109,8 +108,6 @@ class _ProfileWidgetState extends State<ProfileWidget> {
     );
   }
 
-  // ── Handlers ─────────────────────────────────────────────────────────────
-
   Future<void> _handleLogin() async {
     final email = _model.loginEmailController.text.trim();
     final password = _model.loginPasswordController.text;
@@ -156,102 +153,50 @@ class _ProfileWidgetState extends State<ProfileWidget> {
     await _authNotifier.logout();
   }
 
-  // ── Views ─────────────────────────────────────────────────────────────────
-
-  Widget _buildHeader(BuildContext context) {
-    final theme = FlutterFlowTheme.of(context);
-    return Container(
-      decoration: BoxDecoration(color: theme.secondaryBackground),
-      child: Padding(
-        padding: EdgeInsetsDirectional.fromSTEB(
-          theme.designToken.spacing.lg,
-          theme.designToken.spacing.md,
-          theme.designToken.spacing.lg,
-          theme.designToken.spacing.md,
-        ),
-        child: Text(
-          'Profile',
-          style: theme.headlineMedium.override(
-            font: GoogleFonts.playfairDisplay(fontWeight: FontWeight.w600),
-            color: theme.primaryText,
-            fontSize: 28.0,
-            letterSpacing: 0.0,
-            fontWeight: FontWeight.w600,
-            lineHeight: 1.25,
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildAuthenticatedView(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
     final user = _authNotifier.user;
     final fullName = user?.userMetadata?.fullName;
 
-    return Column(
-      mainAxisSize: MainAxisSize.max,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _buildHeader(context),
-        Expanded(
-          child: Padding(
-            padding: EdgeInsets.all(theme.designToken.spacing.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: theme.secondaryBackground,
-                    borderRadius: BorderRadius.circular(theme.designToken.radius.md),
-                    border: Border.all(color: theme.outline, width: 1.0),
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.all(theme.designToken.spacing.lg),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(Icons.person_rounded, size: 48.0, color: theme.primary),
-                        SizedBox(height: theme.designToken.spacing.md),
-                        if (fullName != null && fullName.isNotEmpty) ...[
-                          Text(
-                            fullName,
-                            style: theme.titleMedium.override(
-                              font: GoogleFonts.outfit(fontWeight: FontWeight.w600),
-                              color: theme.primaryText,
-                            ),
-                          ),
-                          SizedBox(height: theme.designToken.spacing.xs),
-                        ],
-                        Text(
-                          user?.email ?? '',
-                          style: theme.bodyMedium.override(color: theme.secondaryText),
-                        ),
-                      ],
+    return Padding(
+      padding: EdgeInsets.all(theme.designToken.spacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: theme.secondaryBackground,
+              borderRadius: BorderRadius.circular(theme.designToken.radius.md),
+              border: Border.all(color: theme.outline, width: 1.0),
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(theme.designToken.spacing.lg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.person_rounded, size: 48.0, color: theme.primary),
+                  SizedBox(height: theme.designToken.spacing.md),
+                  if (fullName != null && fullName.isNotEmpty) ...[
+                    Text(
+                      fullName,
+                      style: theme.titleMedium.override(
+                        font: GoogleFonts.outfit(fontWeight: FontWeight.w600),
+                        color: theme.primaryText,
+                      ),
                     ),
+                    SizedBox(height: theme.designToken.spacing.xs),
+                  ],
+                  Text(
+                    user?.email ?? '',
+                    style: theme.bodyMedium.override(color: theme.secondaryText),
                   ),
-                ),
-                SizedBox(height: theme.designToken.spacing.xl),
-                FFButtonWidget(
-                  onPressed: _handleLogout,
-                  text: 'Logout',
-                  options: FFButtonOptions(
-                    width: double.infinity,
-                    height: 48.0,
-                    color: theme.error,
-                    textStyle: theme.titleSmall.override(
-                      font: GoogleFonts.outfit(fontWeight: FontWeight.w600),
-                      color: Colors.white,
-                    ),
-                    borderRadius: BorderRadius.circular(theme.designToken.radius.sm),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -288,7 +233,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
             'Enter your password',
             suffixIcon: _visibilityToggle(
               _model.isPasswordVisible,
-              () => setState(() => _model.togglePasswordVisibility()),
+                  () => setState(() => _model.togglePasswordVisibility()),
             ),
           ),
         ),
@@ -379,7 +324,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
               'At least 6 characters',
               suffixIcon: _visibilityToggle(
                 _model.isPasswordVisible,
-                () => setState(() => _model.togglePasswordVisibility()),
+                    () => setState(() => _model.togglePasswordVisibility()),
               ),
             ),
           ),
@@ -394,7 +339,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
               'Re-enter your password',
               suffixIcon: _visibilityToggle(
                 _model.isConfirmPasswordVisible,
-                () => setState(() => _model.toggleConfirmPasswordVisibility()),
+                    () => setState(() => _model.toggleConfirmPasswordVisibility()),
               ),
             ),
           ),
@@ -432,23 +377,15 @@ class _ProfileWidgetState extends State<ProfileWidget> {
 
   Widget _buildUnauthenticatedView(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
-    return Column(
-      mainAxisSize: MainAxisSize.max,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _buildHeader(context),
-        Expanded(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.all(theme.designToken.spacing.lg),
-              child: Container(
-                constraints: const BoxConstraints(maxWidth: 400),
-                child: _model.isLoginMode ? _buildLoginForm(context) : _buildSignupForm(context),
-              ),
-            ),
-          ),
+
+    return Center(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.all(theme.designToken.spacing.lg),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 400),
+          child: _model.isLoginMode ? _buildLoginForm(context) : _buildSignupForm(context),
         ),
-      ],
+      ),
     );
   }
 
@@ -457,6 +394,22 @@ class _ProfileWidgetState extends State<ProfileWidget> {
     if (_authNotifier.status == AuthStatus.loading && _authNotifier.user == null) {
       return const Center(child: CircularProgressIndicator());
     }
-    return _authNotifier.isAuthenticated ? _buildAuthenticatedView(context) : _buildUnauthenticatedView(context);
+
+    final isAuthed = _authNotifier.isAuthenticated;
+
+    return Scaffold(
+      backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+      appBar: AppPageBar(
+        title: 'Profile',
+        action: isAuthed
+            ? AppPageBarAction(
+          label: 'Logout',
+          onTap: _handleLogout,
+          color: FlutterFlowTheme.of(context).error,
+        )
+            : null,
+      ),
+      body: isAuthed ? _buildAuthenticatedView(context) : _buildUnauthenticatedView(context),
+    );
   }
 }

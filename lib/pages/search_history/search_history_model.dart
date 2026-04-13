@@ -1,4 +1,6 @@
+import 'package:ft_fndr_app/models/bookmarks_model.dart';
 import 'package:ft_fndr_app/models/history_repo.dart';
+import 'package:ft_fndr_app/services/ApiService.dart';
 import 'package:ft_fndr_app/services/Locator.dart';
 
 import '/components/history_item_widget.dart';
@@ -34,6 +36,7 @@ class SearchHistoryModel extends FlutterFlowModel<SearchHistoryWidget> {
   TextEditingController? textController;
   String? Function(BuildContext, String?)? textControllerValidator;
 
+  final api = getIt<ApiService>();
   final repo = getIt<HistoryRepository>();
 
   SearchHistoryStatus status = SearchHistoryStatus.initial;
@@ -59,6 +62,7 @@ class SearchHistoryModel extends FlutterFlowModel<SearchHistoryWidget> {
   }
 
   Future<void> clearHistory(BuildContext context) async {
+    if (status == SearchHistoryStatus.loading) return;
     status = SearchHistoryStatus.loading;
     errorMessage = null;
 
@@ -74,15 +78,31 @@ class SearchHistoryModel extends FlutterFlowModel<SearchHistoryWidget> {
   }
 
   Future<void> deleteHistoryItem(BuildContext context, String historyId) async {
+    if (status == SearchHistoryStatus.loading) return;
     status = SearchHistoryStatus.loading;
     errorMessage = null;
 
     try {
       await repo.deleteHistoryItem(historyId);
-      await loadHistory(context);
+      historyGroups = await repo.getGroupedHistory();
+      _initHistoryItemModels(context);
+      status = SearchHistoryStatus.success;
     } catch (e) {
       errorMessage = e.toString();
       status = SearchHistoryStatus.error;
+    }
+  }
+
+  Future<void> bookmarkHistoryItem(BuildContext context, String historyId) async {
+    try {
+      final res = await api.createBookmark(CreateBookmarkRequest(historyId: historyId));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(res.message)),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to bookmark item: ${e.toString()}')),
+      );
     }
   }
 

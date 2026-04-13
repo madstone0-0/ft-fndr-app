@@ -1,4 +1,7 @@
 import 'dart:io';
+import 'package:ft_fndr_app/providers/AuthNotifier.dart';
+import 'package:ft_fndr_app/services/Locator.dart';
+
 import '/components/recent_search_card_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -20,17 +23,38 @@ class HomeWidget extends StatefulWidget {
 
 class _HomeWidgetState extends State<HomeWidget> {
   late HomeModel _model;
+  late AuthNotifier _authNotifier;
+  late bool loggedIn;
 
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => HomeModel());
+    _authNotifier = getIt<AuthNotifier>();
+
+    loggedIn = _authNotifier.isAuthenticated;
+    _authNotifier.addListener(_onAuthStateChanged);
   }
 
   @override
   void dispose() {
     _model.dispose();
+    _authNotifier.removeListener(_onAuthStateChanged);
     super.dispose();
+  }
+
+  void _onAuthStateChanged() {
+    if (!mounted) return;
+
+    if (_authNotifier.isAuthenticated) {
+      setState(() {
+        loggedIn = true;
+      });
+    } else {
+      setState(() {
+        loggedIn = false;
+      });
+    }
   }
 
   Future<void> _navigateToResults(String imagePath) async {
@@ -104,7 +128,16 @@ class _HomeWidgetState extends State<HomeWidget> {
               children: [
                 // Camera search button
                 GestureDetector(
-                  onTap: _openCameraSearch,
+                  onTap: () {
+                    // If is authed allow camera access, otherwise prompt to log in
+                    if (loggedIn) {
+                      _openCameraSearch();
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Please log in to use camera search.')),
+                      );
+                    }
+                  },
                   child: Padding(
                     padding: EdgeInsets.all(theme.designToken.spacing.lg),
                     child: ClipRRect(
@@ -118,7 +151,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                         child: Stack(
                           children: [
                             Align(
-                              alignment: AlignmentDirectional(0.0, 0.0),
+                              alignment: const AlignmentDirectional(0.0, 0.0),
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -180,7 +213,15 @@ class _HomeWidgetState extends State<HomeWidget> {
                     children: [
                       Expanded(
                         child: GestureDetector(
-                          onTap: _openGallerySearch,
+                          onTap: () {
+                            if (loggedIn) {
+                              _openGallerySearch();
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Please log in to upload photos.')),
+                              );
+                            }
+                          },
                           child: _buildActionButton(
                             context,
                             icon: Icons.north_rounded,
@@ -188,45 +229,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                           ),
                         ),
                       ),
-                      // Expanded(
-                      //   child: GestureDetector(
-                      //     onTap: () {
-                      //       // TODO: paste URL flow
-                      //     },
-                      //     child: _buildActionButton(
-                      //       context,
-                      //       icon: Icons.add_rounded,
-                      //       label: 'Paste URL',
-                      //     ),
-                      //   ),
-                      // ),
                     ].divide(SizedBox(width: theme.designToken.spacing.md)),
-                  ),
-                ),
-                // Recent searches
-                Padding(
-                  padding: EdgeInsets.all(theme.designToken.spacing.lg),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Recent Searches',
-                        style: theme.titleMedium.override(
-                          font: GoogleFonts.outfit(fontWeight: FontWeight.w600),
-                          color: theme.primaryText,
-                          fontSize: 17.0,
-                          fontWeight: FontWeight.w600,
-                          lineHeight: 1.35,
-                        ),
-                      ),
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                        ]
-                      ),
-                    ].divide(SizedBox(height: theme.designToken.spacing.md)),
                   ),
                 ),
               ],

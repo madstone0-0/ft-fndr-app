@@ -30,6 +30,10 @@ class _ResultsWidgetState extends State<ResultsWidget> {
   late ResultsModel vm;
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  bool _isSearchingImages = false;
+  bool _isLoadingWebPages = false;
+  String? _pendingImageUrl;
+
   @override
   void initState() {
     super.initState();
@@ -44,16 +48,48 @@ class _ResultsWidgetState extends State<ResultsWidget> {
   }
 
   Future<void> _search() async {
-    await vm.search(context, widget.imageFilePath);
-    if (mounted) safeSetState(() {});
+    if (_isSearchingImages) return;
+
+    _isSearchingImages = true;
+    try {
+      await vm.search(context, widget.imageFilePath);
+      if (mounted) safeSetState(() {});
+    } finally {
+      _isSearchingImages = false;
+    }
   }
 
   Future<void> _selectImage(String imageUrl) async {
-    await vm.selectImageAndLoadWebPages(context, imageUrl);
-    if (mounted) safeSetState(() {});
+    if (_isLoadingWebPages) return;
+
+    if (vm.selectedImageUrl == imageUrl && vm.status == ResultsStatus.webPagesLoaded) {
+      return;
+    }
+
+    if (mounted) {
+      safeSetState(() {
+        _isLoadingWebPages = true;
+        _pendingImageUrl = imageUrl;
+        vm.selectedImageUrl = imageUrl;
+        vm.status = ResultsStatus.loadingWebPages;
+      });
+    }
+
+    try {
+      await vm.selectImageAndLoadWebPages(context, imageUrl);
+      if (mounted) safeSetState(() {});
+    } finally {
+      if (mounted) {
+        safeSetState(() {
+          _isLoadingWebPages = false;
+          _pendingImageUrl = null;
+        });
+      }
+    }
   }
 
   Future<void> _retry() async {
+    if (_isSearchingImages || _isLoadingWebPages) return;
     await vm.retry(context, widget.imageFilePath);
     if (mounted) safeSetState(() {});
   }
@@ -61,14 +97,89 @@ class _ResultsWidgetState extends State<ResultsWidget> {
   Widget _buildStatusBody(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
 
-    final isLoading = vm.status == ResultsStatus.loadingImages ||
-        vm.status == ResultsStatus.loadingWebPages ||
-        vm.status == ResultsStatus.initial;
+    if (vm.status == ResultsStatus.loadingWebPages) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (vm.selectedImageUrl != null)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(theme.designToken.radius.xl),
+              child: SizedBox(
+                height: 220.0,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    CachedNetworkImage(
+                      imageUrl: vm.selectedImageUrl!,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        color: theme.secondaryBackground,
+                        child: const Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        color: theme.secondaryBackground,
+                        child: const Icon(Icons.broken_image_rounded),
+                      ),
+                    ),
+                    Align(
+                      alignment: const AlignmentDirectional(-1.0, 1.0),
+                      child: Padding(
+                        padding: EdgeInsets.all(theme.designToken.spacing.md),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xCCFFFFFF),
+                            borderRadius: BorderRadius.circular(
+                              theme.designToken.radius.full,
+                            ),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                              16.0,
+                              8.0,
+                              16.0,
+                              8.0,
+                            ),
+                            child: Text(
+                              'Selected image',
+                              style: theme.labelSmall.override(
+                                font: GoogleFonts.outfit(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                color: theme.primaryText,
+                                fontSize: 11.0,
+                                fontWeight: FontWeight.w600,
+                                lineHeight: 1.27,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          const SizedBox(height: 16.0),
+          const Center(child: CircularProgressIndicator()),
+          const SizedBox(height: 12.0),
+          Center(
+            child: Text(
+              'Fetching webpages...',
+              style: theme.bodyMedium.override(
+                font: GoogleFonts.outfit(),
+                color: theme.secondaryText,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    final isLoading = vm.status == ResultsStatus.loadingImages || vm.status == ResultsStatus.initial;
 
     if (isLoading) {
-      final text =
-          vm.status == ResultsStatus.loadingWebPages ? 'Fetching webpages...' : 'Searching for similar images...';
-
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -76,7 +187,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
             const CircularProgressIndicator(),
             const SizedBox(height: 12.0),
             Text(
-              text,
+              'Searching for similar images...',
               style: theme.bodyMedium.override(
                 font: GoogleFonts.outfit(),
                 color: theme.secondaryText,
@@ -130,7 +241,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
               fit: BoxFit.cover,
             ),
             Align(
-              alignment: AlignmentDirectional(-1.0, 1.0),
+              alignment: const AlignmentDirectional(-1.0, 1.0),
               child: Padding(
                 padding: EdgeInsets.all(theme.designToken.spacing.md),
                 child: Container(
@@ -203,69 +314,88 @@ class _ResultsWidgetState extends State<ResultsWidget> {
             ),
             itemBuilder: (context, index) {
               final item = vm.imageResults[index];
+              final isPending = _pendingImageUrl == item.imageUrl;
 
-              return InkWell(
-                borderRadius: BorderRadius.circular(
-                  theme.designToken.radius.lg,
-                ),
-                onTap: () => _selectImage(item.imageUrl),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: theme.secondaryBackground,
-                    borderRadius: BorderRadius.circular(theme.designToken.radius.lg),
-                    border: Border.all(
-                      color: theme.divider,
-                      width: 1.0,
-                    ),
+              return AbsorbPointer(
+                absorbing: _isLoadingWebPages,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(
+                    theme.designToken.radius.lg,
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.vertical(
-                            top: Radius.circular(theme.designToken.radius.lg),
-                          ),
-                          child: CachedNetworkImage(
-                            imageUrl: item.imageUrl,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => Container(
-                              color: theme.secondaryBackground,
-                              child: const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                            ),
-                            errorWidget: (context, url, error) => Container(
-                              color: theme.secondaryBackground,
-                              child: const Icon(Icons.broken_image_rounded),
-                            ),
-                          ),
+                  onTap: () => _selectImage(item.imageUrl),
+                  child: Opacity(
+                    opacity: _isLoadingWebPages && !isPending ? 0.6 : 1.0,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: theme.secondaryBackground,
+                        borderRadius: BorderRadius.circular(theme.designToken.radius.lg),
+                        border: Border.all(
+                          color: theme.divider,
+                          width: 1.0,
                         ),
                       ),
-                      Padding(
-                        padding: EdgeInsets.all(theme.designToken.spacing.md),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'Use this image',
-                                style: theme.labelMedium.override(
-                                  font: GoogleFonts.outfit(
-                                    fontWeight: FontWeight.w600,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(theme.designToken.radius.lg),
                                   ),
-                                  color: theme.primaryText,
+                                  child: CachedNetworkImage(
+                                    imageUrl: item.imageUrl,
+                                    fit: BoxFit.cover,
+                                    placeholder: (context, url) => Container(
+                                      color: theme.secondaryBackground,
+                                      child: const Center(
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    ),
+                                    errorWidget: (context, url, error) => Container(
+                                      color: theme.secondaryBackground,
+                                      child: const Icon(Icons.broken_image_rounded),
+                                    ),
+                                  ),
                                 ),
-                              ),
+                                if (isPending)
+                                  Container(
+                                    color: Colors.black26,
+                                    child: const Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  ),
+                              ],
                             ),
-                            Icon(
-                              Icons.arrow_forward_rounded,
-                              color: theme.primaryText,
-                              size: 18.0,
+                          ),
+                          Padding(
+                            padding: EdgeInsets.all(theme.designToken.spacing.md),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    isPending ? 'Loading webpages...' : 'Use this image',
+                                    style: theme.labelMedium.override(
+                                      font: GoogleFonts.outfit(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      color: theme.primaryText,
+                                    ),
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.arrow_forward_rounded,
+                                  color: theme.primaryText,
+                                  size: 18.0,
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               );
@@ -308,7 +438,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                       ),
                     ),
                     Align(
-                      alignment: AlignmentDirectional(-1.0, 1.0),
+                      alignment: const AlignmentDirectional(-1.0, 1.0),
                       child: Padding(
                         padding: EdgeInsets.all(theme.designToken.spacing.md),
                         child: Container(
@@ -360,10 +490,12 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                 ),
               ),
               TextButton(
-                onPressed: () {
-                  vm.resetToImageSelection(context);
-                  safeSetState(() {});
-                },
+                onPressed: _isLoadingWebPages
+                    ? null
+                    : () {
+                        vm.resetToImageSelection(context);
+                        safeSetState(() {});
+                      },
                 child: const Text('Change image'),
               ),
             ],

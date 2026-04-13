@@ -8,14 +8,13 @@ import 'package:ft_fndr_app/pages/home/home_widget.dart';
 import 'package:ft_fndr_app/pages/profile/profile_widget.dart';
 import 'package:ft_fndr_app/pages/results/results_widget.dart';
 import 'package:ft_fndr_app/pages/search_history/search_history_widget.dart';
-import 'package:ft_fndr_app/pages/seller_details/seller_details_widget.dart';
 import 'package:ft_fndr_app/providers/AuthNotifier.dart';
 import 'package:ft_fndr_app/services/Locator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import '/flutter_flow/flutter_flow_util.dart';
-import '/pages/shell/main_shell_widget.dart';
+import '/pages/shell/shell_widget.dart';
 
 import '/index.dart';
 
@@ -52,11 +51,9 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
       },
       errorBuilder: (context, state) => HomeWidget(),
       routes: [
-        // ── Shell: persistent bottom nav for all primary tab destinations ──
         StatefulShellRoute.indexedStack(
-          builder: (context, state, navigationShell) => MainShellWidget(navigationShell: navigationShell),
+          builder: (context, state, navigationShell) => ShellWidget(navigationShell: navigationShell),
           branches: [
-            // Branch 0 – Search / Camera (Home)
             StatefulShellBranch(
               routes: [
                 FFRoute(
@@ -66,7 +63,6 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
                 ).toRoute(appStateNotifier),
               ],
             ),
-            // Branch 1 – History (SearchHistory)
             StatefulShellBranch(
               routes: [
                 FFRoute(
@@ -76,7 +72,6 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
                 ).toRoute(appStateNotifier),
               ],
             ),
-            // Branch 2 – Saved (Bookmarks)
             StatefulShellBranch(
               routes: [
                 FFRoute(
@@ -86,7 +81,6 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
                 ).toRoute(appStateNotifier),
               ],
             ),
-            // Branch 3 – Profile
             StatefulShellBranch(
               routes: [
                 FFRoute(
@@ -98,7 +92,6 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
             ),
           ],
         ),
-        // ── Detail / secondary screens (no shell / bottom nav) ──
         FFRoute(
           name: ResultsWidget.routeName,
           path: ResultsWidget.routePath,
@@ -107,11 +100,6 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
 
             return ResultsWidget(imageFilePath: imagePath);
           },
-        ).toRoute(appStateNotifier),
-        FFRoute(
-          name: SellerDetailsWidget.routeName,
-          path: SellerDetailsWidget.routePath,
-          builder: (context, params) => SellerDetailsWidget(),
         ).toRoute(appStateNotifier),
       ],
     );
@@ -124,8 +112,6 @@ extension NavParamExtensions on Map<String, String?> {
 
 extension NavigationExtensions on BuildContext {
   void safePop() {
-    // If there is only one route on the stack, navigate to the initial
-    // page instead of popping.
     if (canPop()) {
       pop();
     } else {
@@ -155,8 +141,6 @@ class FFParameters {
 
   Map<String, dynamic> futureParamValues = {};
 
-  // Parameters are empty if the params map is empty or if the only parameter
-  // present is the special extra parameter reserved for the transition info.
   bool get isEmpty =>
       state.allParams.isEmpty || (state.allParams.length == 1 && state.extraMap.containsKey(kTransitionInfoKey));
 
@@ -189,11 +173,9 @@ class FFParameters {
       return null;
     }
     final param = state.allParams[paramName];
-    // Got parameter from `extras`, so just directly return it.
     if (param is! String) {
       return param;
     }
-    // Return serialized value.
     return deserializeParam<T>(
       param,
       type,

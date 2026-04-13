@@ -3,8 +3,8 @@ import '/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class MainShellWidget extends StatelessWidget {
-  const MainShellWidget({
+class ShellWidget extends StatelessWidget {
+  const ShellWidget({
     super.key,
     required this.navigationShell,
   });
@@ -27,7 +27,6 @@ class MainShellWidget extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: theme.primaryBackground,
-      // SafeArea on top ensures content never renders under the status bar.
       body: SafeArea(
         bottom: false,
         child: navigationShell,

@@ -1,15 +1,9 @@
 import '/components/bookmark_item_widget.dart';
 import '/components/stat_card_widget.dart';
-import '/flutter_flow/flutter_flow_choice_chips.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart' hide BookmarksWidget;
-import '/flutter_flow/flutter_flow_widgets.dart';
+import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/form_field_controller.dart';
-import 'dart:ui';
 import 'bookmarks_widget.dart' show BookmarksWidget;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 
 import 'package:ft_fndr_app/models/bookmarks_model.dart';
 import 'package:ft_fndr_app/models/history_model.dart';

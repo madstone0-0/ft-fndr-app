@@ -71,6 +71,6 @@ abstract class ApiService {
   @DELETE(historyDeleteRoute)
   Future<MessageResponse> deleteHistoryItem(@Path("historyId") String historyId);
 
-  @POST(historyClearRoute)
+  @DELETE(historyClearRoute)
   Future<MessageResponse> clearHistory();
 }
