@@ -15,14 +15,14 @@ class BookmarkDisplayItem {
   final String historyId;
   final DateTime savedAt;
   final String title;
-  final String imgDesc;
+  final String imgUrl;
 
   const BookmarkDisplayItem({
     required this.id,
     required this.historyId,
     required this.savedAt,
     required this.title,
-    required this.imgDesc,
+    required this.imgUrl,
   });
 
   String get savedLabel {
@@ -107,27 +107,35 @@ class BookmarksModel extends FlutterFlowModel<BookmarksWidget> {
 
     try {
       final api = getIt<ApiService>();
-      final results = await Future.wait([
-        api.getBookmarks(),
-        api.getHistory(),
-      ]);
-
-      final bookmarksResp = results[0] as BookmarksResponse;
-      final historyResp = results[1] as HistoryResponse;
-
-      historyItems = historyResp.data;
-      final historyMap = {for (final h in historyResp.data) h.id: h};
-
-      bookmarks = bookmarksResp.data.map((b) {
-        final history = historyMap[b.historyId];
-        return BookmarkDisplayItem(
-          id: b.id,
-          historyId: b.historyId,
-          savedAt: b.savedAt,
-          title: history?.vendorUrl ?? 'Unknown item',
-          imgDesc: history?.imgUrl ?? '',
-        );
-      }).toList();
+      // final results = await Future.wait([
+      //   api.getBookmarks(),
+      //   api.getHistory(),
+      // ]);
+      //
+      // final bookmarksResp = results[0] as BookmarksResponse;
+      // final historyResp = results[1] as HistoryResponse;
+      //
+      // historyItems = historyResp.data;
+      // final historyMap = {for (final h in historyResp.data) h.id: h};
+      //
+      // bookmarks = bookmarksResp.data.map((b) {
+      //   final history = historyMap[b.historyId];
+      //   return BookmarkDisplayItem(
+      //     id: b.id,
+      //     historyId: b.historyId,
+      //     savedAt: b.savedAt,
+      //     title: history?.vendorUrl ?? 'Unknown item',
+      //     imgUrl: history?.imgUrl ?? '',
+      //   );
+      // }).toList();
+      final res = await api.getBookmarks();
+      bookmarks = res.data.map((b) => BookmarkDisplayItem(
+        title: b.domain,
+        historyId: b.historyId,
+        id: b.id,
+        imgUrl: b.imgUrl,
+        savedAt: b.savedAt,
+      )).toList();
 
       status = bookmarks.isEmpty ? BookmarksStatus.empty : BookmarksStatus.success;
     } catch (e) {

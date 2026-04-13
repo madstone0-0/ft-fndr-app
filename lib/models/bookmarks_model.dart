@@ -4,10 +4,8 @@ part "bookmarks_model.g.dart";
 
 @JsonSerializable()
 class Bookmark {
+  @JsonKey(name: "bid")
   final String id;
-
-  @JsonKey(name: 'uid')
-  final String userId;
 
   @JsonKey(name: 'hid')
   final String historyId;
@@ -15,11 +13,18 @@ class Bookmark {
   @JsonKey(name: 'savedat')
   final DateTime savedAt;
 
+  @JsonKey(name: "imageurl")
+  final String imgUrl;
+
+  @JsonKey(name: "domain")
+  final String domain;
+
   const Bookmark({
     required this.id,
-    required this.userId,
     required this.historyId,
     required this.savedAt,
+    required this.imgUrl,
+    required this.domain,
   });
 
   factory Bookmark.fromJson(Map<String, dynamic> json) => _$BookmarkFromJson(json);

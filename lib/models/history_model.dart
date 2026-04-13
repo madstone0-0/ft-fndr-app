@@ -21,6 +21,9 @@ class HistoryItem {
   @JsonKey(name: 'uid')
   final String userId;
 
+  @JsonKey(name: "title")
+  final String title;
+
   @JsonKey(name: "vendorurl")
   final String vendorUrl;
   @JsonKey(name: "imageurl")
@@ -34,6 +37,7 @@ class HistoryItem {
     required this.vendorUrl,
     required this.imgUrl,
     required this.timestamp,
+    required this.title,
   });
 
   factory HistoryItem.fromJson(Map<String, dynamic> json) => _$HistoryItemFromJson(json);

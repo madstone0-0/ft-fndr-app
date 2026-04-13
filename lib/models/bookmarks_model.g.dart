@@ -7,17 +7,19 @@ part of 'bookmarks_model.dart';
 // **************************************************************************
 
 Bookmark _$BookmarkFromJson(Map<String, dynamic> json) => Bookmark(
-      id: json['id'] as String,
-      userId: json['uid'] as String,
+      id: json['bid'] as String,
       historyId: json['hid'] as String,
       savedAt: DateTime.parse(json['savedat'] as String),
+      imgUrl: json['imageurl'] as String,
+      domain: json['domain'] as String,
     );
 
 Map<String, dynamic> _$BookmarkToJson(Bookmark instance) => <String, dynamic>{
-      'id': instance.id,
-      'uid': instance.userId,
+      'bid': instance.id,
       'hid': instance.historyId,
       'savedat': instance.savedAt.toIso8601String(),
+      'imageurl': instance.imgUrl,
+      'domain': instance.domain,
     };
 
 BookmarksResponse _$BookmarksResponseFromJson(Map<String, dynamic> json) =>

@@ -66,12 +66,34 @@ class _BookmarkItemWidgetState extends State<BookmarkItemWidget> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                width: 56.0,
-                height: 56.0,
-                decoration: BoxDecoration(
-                  color: Color(0xFFC5A073),
-                  borderRadius: BorderRadius.circular(FlutterFlowTheme.of(context).designToken.radius.md),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(
+                  FlutterFlowTheme.of(context).designToken.radius.md,
+                ),
+                child: SizedBox(
+                  width: 56,
+                  height: 56,
+                  child: widget.imgUrl != null && widget.imgUrl!.isNotEmpty
+                      ? Image.network(
+                    widget.imgUrl!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: const Color(0xFFC5A073),
+                    ),
+                    loadingBuilder: (context, child, progress) {
+                      if (progress == null) return child;
+                      return Container(
+                        color: const Color(0xFFC5A073),
+                        alignment: Alignment.center,
+                        child: const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      );
+                    },
+                  )
+                      : Container(color: const Color(0xFFC5A073)),
                 ),
               ),
               Expanded(

@@ -225,9 +225,9 @@ class _BookmarksWidgetState extends State<BookmarksWidget> {
             model: _model.bookmarkItemModels[i],
             updateCallback: () => setState(() {}),
             child: BookmarkItemWidget(
-              imgUrl: _model.bookmarks[i].colourHex,
+              imgUrl: _model.bookmarks[i].imgUrl,
               site: _model.bookmarks[i].title,
-              url: _model.bookmarks[i].imgDesc,
+              url: _model.bookmarks[i].imgUrl,
               time: _model.bookmarks[i].savedLabel,
               onDelete: () => _deleteBookmark(_model.bookmarks[i].id),
             ),

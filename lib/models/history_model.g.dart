@@ -22,12 +22,14 @@ HistoryItem _$HistoryItemFromJson(Map<String, dynamic> json) => HistoryItem(
       vendorUrl: json['vendorurl'] as String,
       imgUrl: json['imageurl'] as String,
       timestamp: DateTime.parse(json['createdat'] as String),
+      title: json['title'] as String,
     );
 
 Map<String, dynamic> _$HistoryItemToJson(HistoryItem instance) =>
     <String, dynamic>{
       'hid': instance.id,
       'uid': instance.userId,
+      'title': instance.title,
       'vendorurl': instance.vendorUrl,
       'imageurl': instance.imgUrl,
       'createdat': instance.timestamp.toIso8601String(),

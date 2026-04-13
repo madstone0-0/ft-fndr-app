@@ -71,9 +71,15 @@ class SearchHistoryModel extends FlutterFlowModel<SearchHistoryWidget> {
       historyGroups = [];
       _initHistoryItemModels(context);
       status = SearchHistoryStatus.success;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Search history cleared')),
+      );
     } catch (e) {
       errorMessage = e.toString();
       status = SearchHistoryStatus.error;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to clear history: ${e.toString()}')),
+      );
     }
   }
 
@@ -87,9 +93,15 @@ class SearchHistoryModel extends FlutterFlowModel<SearchHistoryWidget> {
       historyGroups = await repo.getGroupedHistory();
       _initHistoryItemModels(context);
       status = SearchHistoryStatus.success;
+      ScaffoldMessenger. of(context).showSnackBar(
+        const SnackBar(content: Text('History item deleted')),
+      );
     } catch (e) {
       errorMessage = e.toString();
       status = SearchHistoryStatus.error;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete item: ${e.toString()}')),
+      );
     }
   }
 
